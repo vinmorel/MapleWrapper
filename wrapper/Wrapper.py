@@ -26,7 +26,7 @@ class MapleWrapper():
         self.assets_pth = "C:/Users/vin_m/Desktop/BitBucket/MB/maplebot/testing/assets/"
         self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
         self.mobs_t = [cv2.imread(join(self.assets_pth, "monsters/", f),0) for f in sorted(listdir(join(self.assets_pth,"monsters/"))) if isfile(join(self.assets_pth,"monsters/", f))]
-        # self.masks_t = [cv2.imread(join(self.assets_pth, "masks/", f),0) for f in sorted(listdir(join(self.assets_pth,"masks/"))) if isfile(join(self.assets_pth,"masks/", f))]
+        self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers/"))) if isfile(join(self.assets_pth,"numbers/", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,'slash2.png'),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,'bracket2.png'),0)
 
@@ -78,7 +78,7 @@ class MapleWrapper():
 
     def get_stats(self):
         coords = {
-        'lvl' : [41, 9, 78, 33],
+        # 'lvl' : [41, 9, 78, 33],
         'HP' : [243, 9, None, 18],
         'MP' : [354, 9, None, 18],
         'EXP' : [467, 9, None, 18]
@@ -90,17 +90,22 @@ class MapleWrapper():
         brackets = self.multi_template_matching(self.ui, self.bracket_t, 0.9)
         x2s = np.sort(brackets[:,0])
         
-        coords['HP'][2] = x1s[0]
-        coords['MP'][2] = x1s[1]
-        coords['EXP'][2] = x2s[2]
+        buffer = 2
+        
+        coords['HP'][2] = x1s[0] + buffer
+        coords['MP'][2] = x1s[1] + buffer
+        coords['EXP'][2] = x2s[2] + buffer
         
         stats = []
         
         for k,v in coords.items():
             crop = self.ui[v[1]:v[3], v[0]:v[2]]
-            txt = self.ocr_text(crop)
-            txt = self.process_text(txt)
-            stats.append(txt)
+            
+            stat = self.get_numbers(crop)
+            # txt = self.ocr_text(crop)
+            # txt = self.process_text(txt)
+            # stats.append(txt)
+            stats.append(stat)
         return stats
 
     def process_text(self, txt):
@@ -116,6 +121,38 @@ class MapleWrapper():
         
         return ocr_result
     
+    def get_numbers(self, crop):
+        # im = Image.fromarray(crop)
+        # im.show()
+        
+        numbers_list = []
+        for i, template in enumerate(self.numbers_t):
+            im = Image.fromarray(crop)
+            # im.show()
+                        
+            matches = self.multi_template_matching(crop, template, 0.95, cv2.TM_CCOEFF_NORMED)
+            
+            if type(matches) != list:
+                for match in matches:
+                    numbers_list.append([int(match[0]),str(i)])
+        
+        numbers_list = sorted(numbers_list, key = lambda x: int(x[0]))  
+        # print(numbers_list)
+        
+        stat = ""
+        
+        for num in numbers_list:
+            stat += num[1]
+        
+        return int(stat)
+        
+        # im = Image.fromarray(crop)  
+        # d = ImageDraw.Draw(im)
+        # if numbers_list:
+        #     for box in numbers_list:
+        #         box = box[0].tolist()
+        #         d.rectangle([(box[0][0],box[0][1]),(box[0][2],box[0][3])], outline ="red", width=6)
+        # im.show()
 
     def start(self, fps=30):
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
@@ -129,15 +166,17 @@ class MapleWrapper():
             self.content =self.frame[0:int(0.882*self.p_h), :]
             self.ui = self.frame[int(0.9348 * self.p_h):, :int(0.7047 * self.p_w)]
             
+            # self.d.screenshot_to_disk(region=self.p_coords)
+            
             cv2.imwrite("1.png",self.ui)
             
-            try:
-                print(i)
-                i += 1
+            # try:
+                # print(i)
+                # i += 1
 
-                print(self.get_player())
-                print(self.get_mobs())
-                print(self.get_stats())
+                # print(self.get_player())
+                # print(self.get_mobs())
+            print(self.get_stats())
     
                 # mob_boxes = self.get_mobs()
     
@@ -148,11 +187,11 @@ class MapleWrapper():
                 #     d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
                 
                 # im.show()
-            
-            except (Exception) as e:
-                print(e)
-                self.d.stop()
-                sys.exit()
+                # input('...')
+            # except (Exception) as e:
+            #     print(e)
+            #     self.d.stop()
+            #     sys.exit()
          
     def stop(self):
         self.d.stop()
