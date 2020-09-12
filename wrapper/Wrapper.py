@@ -45,7 +45,7 @@ class MapleWrapper():
         bottom_right = (top_left[0] + w, top_left[1] + h)
         return np.array([top_left[0], top_left[1], bottom_right[0], bottom_right[1]], dtype=np.int32)
 
-    def multi_template_matching(self, img, template, threshold=0.9, method=cv2.TM_CCOEFF_NORMED, nms=True):
+    def multi_template_matching(self, img, template, threshold=0.7, method=cv2.TM_CCOEFF_NORMED, nms=True):
         """
         returns int32 numpy array of all NMS filtered template matches above threshold 
         [x0, y1, x1, y1]
@@ -71,25 +71,37 @@ class MapleWrapper():
         entity_list = []
         for i, template in enumerate(self.mobs_t):
             entity_list += self.multi_template_matching(self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False).tolist()
-            
+  
         entity_list = np.asarray(entity_list[:20], dtype=np.int32)
         
         return non_max_suppression_fast(entity_list, 0.6)
 
     def get_stats(self):
-        stats = {
-        'lvl' : (37, 594, 81, 622),
-        'HP' : (243, 594, 0, 605),
-        'MP' : (354, 594, 0, 605),
-        'EXP' : (467, 594, 0, 605)
+        coords = {
+        'lvl' : [41, 9, 78, 33],
+        'HP' : [243, 9, None, 18],
+        'MP' : [354, 9, None, 18],
+        'EXP' : [467, 9, None, 18]
         }
         
-        # self.multi_template_matching(self.ui, self.bracket_t)
+        slashes = self.multi_template_matching(self.ui, self.slash_t, 0.75)
+        x1s = np.sort(slashes[:,0])        
         
-        for stat in ['lvl', 'HP', 'MP', 'EXP']:
-            pass
-
-        return self.multi_template_matching(self.ui, self.bracket_t)
+        brackets = self.multi_template_matching(self.ui, self.bracket_t, 0.9)
+        x2s = np.sort(brackets[:,0])
+        
+        coords['HP'][2] = x1s[0]
+        coords['MP'][2] = x1s[1]
+        coords['EXP'][2] = x2s[2]
+        
+        stats = []
+        
+        for k,v in coords.items():
+            crop = self.ui[v[1]:v[3], v[0]:v[2]]
+            txt = self.ocr_text(crop)
+            txt = self.process_text(txt)
+            stats.append(txt)
+        return stats
 
     def process_text(self, txt):
         txt = re.sub('[^0-9]','', txt)
@@ -102,7 +114,7 @@ class MapleWrapper():
         
         ocr_result = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789./')
         
-        return self.process_text(ocr_result)
+        return ocr_result
     
 
     def start(self, fps=30):
@@ -113,19 +125,19 @@ class MapleWrapper():
         
         i = 0
         while True:  
-            
             self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
             self.content =self.frame[0:int(0.882*self.p_h), :]
             self.ui = self.frame[int(0.9348 * self.p_h):, :int(0.7047 * self.p_w)]
             
+            cv2.imwrite("1.png",self.ui)
             
             try:
                 print(i)
                 i += 1
-                # player_box = self.get_player()
-                
+
                 print(self.get_player())
                 print(self.get_mobs())
+                print(self.get_stats())
     
                 # mob_boxes = self.get_mobs()
     
@@ -136,51 +148,16 @@ class MapleWrapper():
                 #     d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
                 
                 # im.show()
-                # ipt = input("press key to continue...")
-                
+            
             except (Exception) as e:
                 print(e)
                 self.d.stop()
                 sys.exit()
-        
-            
+         
     def stop(self):
         self.d.stop()
 
 if __name__ == "__main__":
-    from os.path import join 
-
-    # d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
     w = MapleWrapper()
-    print(cv2.TM_SQDIFF)
-        # d.capture(target_fps=15, region=w.p_coords)
-    # # warm up grace
-    # time.sleep(0.1)
     w.start()
     
-    # print(w.frame)
-    
-    # print(w.p_w)
-    # print(w.p_h)
-    # print(w.aspect_ratio)
-    
-    # w.start()
-    # time.sleep(1)
-    
-    # print(w.frame)
-    
-    # print(w.get_stats())
-    
-    # d.stop()
-    
-    
-    # print(w.multi_template_matching(cv2.imread(join(w.assets_pth,"1.png"),0), w.name_t))
-    
-    # print(w.ocr_text(cv2.imread(join(w.assets_pth,"161.png"),0)))
-    # region_coords = process_coords("MapleStory")
-
-    # d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
-    # d.capture(target_fps=1, region=region_coords)
-    
-    # time.sleep(2)
-    # d.stop()
