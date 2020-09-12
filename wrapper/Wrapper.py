@@ -128,11 +128,11 @@ class MapleWrapper():
         numbers_list = []
         for i, template in enumerate(self.numbers_t):
             im = Image.fromarray(crop)
-            # im.show()
                         
-            matches = self.multi_template_matching(crop, template, 0.95, cv2.TM_CCOEFF_NORMED)
+            matches = self.multi_template_matching(crop, template, 0.95, cv2.TM_CCOEFF_NORMED, nms=False)
             
             if type(matches) != list:
+                
                 for match in matches:
                     numbers_list.append([int(match[0]),str(i)])
         
@@ -171,8 +171,8 @@ class MapleWrapper():
             cv2.imwrite("1.png",self.ui)
             
             # try:
-                # print(i)
-                # i += 1
+            print(i)
+            i += 1
 
                 # print(self.get_player())
                 # print(self.get_mobs())
@@ -187,7 +187,7 @@ class MapleWrapper():
                 #     d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
                 
                 # im.show()
-                # input('...')
+            # input('...')
             # except (Exception) as e:
             #     print(e)
             #     self.d.stop()
