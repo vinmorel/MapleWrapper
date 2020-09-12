@@ -4,9 +4,6 @@ Created on Fri Sep 11 12:55:00 2020
 
 @author: Vincent Morel
 """
-import sys
-import re
-import pytesseract
 import numpy as np
 import cv2
 from os import listdir
@@ -68,15 +65,24 @@ class MapleWrapper():
         return self.single_template_matching(self.content, self.name_t)
 
     def get_mobs(self):
+        """
+        Returns list of list of mobs position [[x0, y1, x1, y1], ...]
+        Currently must update template assets manually corresponding to mobs in map
+        """
         entity_list = []
         for i, template in enumerate(self.mobs_t):
             entity_list += self.multi_template_matching(self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False).tolist()
   
         entity_list = np.asarray(entity_list[:20], dtype=np.int32)
         
-        return non_max_suppression_fast(entity_list, 0.6)
+        return non_max_suppression_fast(entity_list, 0.8)
 
     def get_stats(self):
+        """
+        Returns [HP, MP, EXP]
+        Crops the UI into close ups of stat numbers dynamically with template matchings of x1 extremities.
+        Matches numbers with crops to deduct the digits (alternative to using Tesseract which is very slow) 
+        """
         coords = {
         # 'lvl' : [41, 9, 78, 33],
         'HP' : [243, 9, None, 18],
@@ -102,42 +108,22 @@ class MapleWrapper():
             crop = self.ui[v[1]:v[3], v[0]:v[2]]
             
             stat = self.get_numbers(crop)
-            # txt = self.ocr_text(crop)
-            # txt = self.process_text(txt)
-            # stats.append(txt)
             stats.append(stat)
         return stats
-
-    def process_text(self, txt):
-        txt = re.sub('[^0-9]','', txt)
-        return int(txt)
-
-    def ocr_text(self, img):
-        ret,thresh = cv2.threshold(img,127,255,cv2.THRESH_BINARY_INV)
-        h,w = thresh.shape 
-        thresh = cv2.resize(thresh,(w*3,h*3))
-        
-        ocr_result = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789./')
-        
-        return ocr_result
     
     def get_numbers(self, crop):
-        # im = Image.fromarray(crop)
-        # im.show()
-        
+        """
+        Returns INT of numbers present in crop  
+        """
         numbers_list = []
-        for i, template in enumerate(self.numbers_t):
-            im = Image.fromarray(crop)
-                        
+        for i, template in enumerate(self.numbers_t):                        
             matches = self.multi_template_matching(crop, template, 0.95, cv2.TM_CCOEFF_NORMED, nms=False)
             
-            if type(matches) != list:
-                
+            if type(matches) != list:                
                 for match in matches:
                     numbers_list.append([int(match[0]),str(i)])
         
         numbers_list = sorted(numbers_list, key = lambda x: int(x[0]))  
-        # print(numbers_list)
         
         stat = ""
         
@@ -146,48 +132,45 @@ class MapleWrapper():
         
         return int(stat)
         
-        # im = Image.fromarray(crop)  
-        # d = ImageDraw.Draw(im)
-        # if numbers_list:
-        #     for box in numbers_list:
-        #         box = box[0].tolist()
-        #         d.rectangle([(box[0][0],box[0][1]),(box[0][2],box[0][3])], outline ="red", width=6)
-        # im.show()
+
 
     def start(self, fps=30):
+        """
+        Starts extracting information from environment, given fps recommendation (slows down if computer can't 
+        handle it). Merge this with agent. 
+
+        """
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.d.capture(target_fps=fps, region=self.p_coords)
-        # warm up
-        time.sleep(1)
+        # let D3dshot warm up
+        time.sleep(0.5)
         
         i = 0
-        while True:  
+        while True:             
             self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
             self.content =self.frame[0:int(0.882*self.p_h), :]
             self.ui = self.frame[int(0.9348 * self.p_h):, :int(0.7047 * self.p_w)]
             
             # self.d.screenshot_to_disk(region=self.p_coords)
             
-            cv2.imwrite("1.png",self.ui)
+            # cv2.imwrite("1.png",self.ui)
             
             # try:
             print(i)
             i += 1
 
-                # print(self.get_player())
-                # print(self.get_mobs())
-            print(self.get_stats())
-    
-                # mob_boxes = self.get_mobs()
+            print(self.get_mobs())
+            
+            mob_boxes = self.get_mobs()
     
     
-                # im = Image.fromarray(self.content)  
-                # d = ImageDraw.Draw(im)
-                # for box in mob_boxes:
-                #     d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
+            im = Image.fromarray(self.content)  
+            d = ImageDraw.Draw(im)
+            for box in mob_boxes:
+                d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
                 
-                # im.show()
-            # input('...')
+            im.show()
+            input('...')
             # except (Exception) as e:
             #     print(e)
             #     self.d.stop()
@@ -200,3 +183,12 @@ if __name__ == "__main__":
     w = MapleWrapper()
     w.start()
     
+
+
+        # im = Image.fromarray(crop)  
+        # d = ImageDraw.Draw(im)
+        # if numbers_list:
+        #     for box in numbers_list:
+        #         box = box[0].tolist()
+        #         d.rectangle([(box[0][0],box[0][1]),(box[0][2],box[0][3])], outline ="red", width=6)
+        # im.show()
