@@ -21,7 +21,7 @@ class MapleWrapper():
         self.p_w = self.p_coords[2] - self.p_coords[0]
         self.p_h = self.p_coords[3] - self.p_coords[1]
         self.gold = (806, 629)
-        self.content_frame = [int(0.3*self.p_h), int(0.882*self.p_h), None, None]
+        self.content_frame = [int(0.3*self.p_h), int(0.75*self.p_h), int(0.1*self.p_w), int(0.9*self.p_w)]
         self.ui_frame = [int(0.9348 * self.p_h), None, None, int(0.7047 * self.p_w)]
         self.assets_pth = "C:/Users/vin_m/Desktop/BitBucket/MB/maplebot/testing/assets/"
         self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
@@ -74,16 +74,18 @@ class MapleWrapper():
         Returns list of list of mobs position [[x0, y1, x1, y1], ...]
         Currently must update template assets manually corresponding to mobs in map
         """
-        ents = np.array([])
+        ents = np.array([], dtype=np.int32)
         for i, template in enumerate(self.mobs_t):
             entities = self.multi_template_matching(self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False)
             ents = np.append(ents, entities)
               
         size = ents.shape[0]
-        chunks = size / 4
+        chunks = size // 4
         
-        entity_list = np.split(ents, chunks)
-        entity_list = np.asarray(entity_list[:20], dtype=np.int32)
+        if chunks != 0:
+            ents = ents.reshape(chunks,-1)
+            
+        entity_list = ents[:10]
 
         return non_max_suppression_fast(entity_list, 0.8)
 
@@ -128,7 +130,7 @@ class MapleWrapper():
         numbers_list = []
         for i, template in enumerate(self.numbers_t):                        
             matches = self.multi_template_matching(crop, template, 0.95, cv2.TM_CCOEFF_NORMED, nms=False)
-            
+
             if type(matches) != list:                
                 for match in matches:
                     numbers_list.append([int(match[0]),str(i)])
@@ -180,7 +182,7 @@ class MapleWrapper():
             
             
             
-            self.content =self.frame[self.content_frame[0]:self.content_frame[1], :]
+            self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
             self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
             
             # self.d.screenshot_to_disk(region=self.p_coords)
@@ -195,6 +197,8 @@ class MapleWrapper():
             
             # mob_boxes = self.get_mobs()
             play = self.get_mobs()
+            a = self.get_player()
+            b = self.get_stats()
         
                 # im = Image.fromarray(self.content)  
                 # d = ImageDraw.Draw(im)
@@ -203,8 +207,11 @@ class MapleWrapper():
                     
                 # im.show()
                 
-            im = Image.fromarray(w.content)
-            im.show()
+            # im = Image.fromarray(w.content)
+            # im.show()
+            # im = Image.fromarray(w.ui)
+            # im.show()
+
                 # im2 = Image.fromarray(w.ui)
         
                 # im.show()
