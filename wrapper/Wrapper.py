@@ -13,19 +13,24 @@ from utils.window_pos import process_coords
 from utils.nms import non_max_suppression_fast
 import time
 from PIL import Image, ImageDraw
+import sys 
 
 class MapleWrapper():
     def __init__(self):
         self.p_coords = process_coords("MapleStory")
         self.p_w = self.p_coords[2] - self.p_coords[0]
         self.p_h = self.p_coords[3] - self.p_coords[1]
-        self.gold = (self.p_w, self.p_w)
+        self.gold = (806, 629)
+        self.content_frame = [int(0.3*self.p_h), int(0.882*self.p_h), None, None]
+        self.ui_frame = [int(0.9348 * self.p_h), None, None, int(0.7047 * self.p_w)]
         self.assets_pth = "C:/Users/vin_m/Desktop/BitBucket/MB/maplebot/testing/assets/"
         self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
         self.mobs_t = [cv2.imread(join(self.assets_pth, "monsters/", f),0) for f in sorted(listdir(join(self.assets_pth,"monsters/"))) if isfile(join(self.assets_pth,"monsters/", f))]
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers/"))) if isfile(join(self.assets_pth,"numbers/", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,'slash2.png'),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,'bracket2.png'),0)
+
+        
 
     def single_template_matching(self, img, template, method=cv2.TM_CCORR_NORMED):
         """
@@ -69,12 +74,17 @@ class MapleWrapper():
         Returns list of list of mobs position [[x0, y1, x1, y1], ...]
         Currently must update template assets manually corresponding to mobs in map
         """
-        entity_list = []
+        ents = np.array([])
         for i, template in enumerate(self.mobs_t):
-            entity_list += self.multi_template_matching(self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False).tolist()
-  
-        entity_list = np.asarray(entity_list[:20], dtype=np.int32)
+            entities = self.multi_template_matching(self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False)
+            ents = np.append(ents, entities)
+              
+        size = ents.shape[0]
+        chunks = size / 4
         
+        entity_list = np.split(ents, chunks)
+        entity_list = np.asarray(entity_list[:20], dtype=np.int32)
+
         return non_max_suppression_fast(entity_list, 0.8)
 
     def get_stats(self):
@@ -132,9 +142,21 @@ class MapleWrapper():
         
         return int(stat)
         
+    def different_ratio(self):
+        return (self.p_w != self.gold[0] or self.p_h != self.gold[1])
 
+    def update_region(self, fps):
+        p_coords = process_coords("MapleStory")
+        if self.p_coords != p_coords:
+            self.p_coords = p_coords
+            self.d.stop()
+            self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
+            self.d.capture(target_fps=fps, region=self.p_coords)
+            time.sleep(0.5) 
+            print('updated')
+        return 'updated'
 
-    def start(self, fps=30):
+    def start(self, fps=25):
         """
         Starts extracting information from environment, given fps recommendation (slows down if computer can't 
         handle it). Merge this with agent. 
@@ -143,13 +165,23 @@ class MapleWrapper():
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.d.capture(target_fps=fps, region=self.p_coords)
         # let D3dshot warm up
-        time.sleep(0.5)
+        time.sleep(0.5)        
         
         i = 0
-        while True:             
+        while True:   
+            self.update_region(fps)
+            
             self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
-            self.content =self.frame[0:int(0.882*self.p_h), :]
-            self.ui = self.frame[int(0.9348 * self.p_h):, :int(0.7047 * self.p_w)]
+            
+            if self.different_ratio():
+                print(self.p_w, self.p_h)
+                self.frame = cv2.resize(self.frame, (self.p_w, self.p_h))
+                self.p_w, self.p_h = self.gold
+            
+            
+            
+            self.content =self.frame[self.content_frame[0]:self.content_frame[1], :]
+            self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
             
             # self.d.screenshot_to_disk(region=self.p_coords)
             
@@ -159,30 +191,43 @@ class MapleWrapper():
             print(i)
             i += 1
 
-            print(self.get_mobs())
+            # print(self.get_mobs())
             
-            mob_boxes = self.get_mobs()
-    
-    
-            im = Image.fromarray(self.content)  
-            d = ImageDraw.Draw(im)
-            for box in mob_boxes:
-                d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
+            # mob_boxes = self.get_mobs()
+            play = self.get_mobs()
+        
+                # im = Image.fromarray(self.content)  
+                # d = ImageDraw.Draw(im)
+                # for box in mob_boxes:
+                #     d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
+                    
+                # im.show()
                 
+            im = Image.fromarray(w.content)
             im.show()
-            input('...')
-            # except (Exception) as e:
+                # im2 = Image.fromarray(w.ui)
+        
+                # im.show()
+                # im2.show()
+                 
+                # input('...')
+                # except (Exception) as e:
+                #     print(e)
+                #     self.d.stop()
+                #     sys.exit()
+            # except Exception as e:
             #     print(e)
             #     self.d.stop()
             #     sys.exit()
+                   
          
     def stop(self):
         self.d.stop()
 
 if __name__ == "__main__":
     w = MapleWrapper()
+
     w.start()
-    
 
 
         # im = Image.fromarray(crop)  
