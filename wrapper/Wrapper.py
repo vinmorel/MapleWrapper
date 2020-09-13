@@ -73,22 +73,25 @@ class MapleWrapper():
     def get_mobs(self):
         """
         Returns list of list of mobs position [[x0, y1, x1, y1], ...]
-        Currently must update template assets manually corresponding to mobs in map
+        Currently must update template assets manually corresponding to mobs in map.
+        Leverages multi-processing.
         """
         ents = np.array([], dtype=np.int32)
-        for i, template in enumerate(self.mobs_t):
-            entities = self.multi_template_matching(self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False)
-            ents = np.append(ents, entities)
-              
-        size = ents.shape[0]
-        chunks = size // 4
-        
-        if chunks != 0:
-            ents = ents.reshape(chunks,-1)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            granular_entities = [executor.submit(self.multi_template_matching, self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False) for template in self.mobs_t]
+            for ent in granular_entities:
+                ents = np.append(ents, ent.result())
             
-        entity_list = ents[:10]
-        entity_list = non_max_suppression_fast(entity_list, 0.8)
-        return entity_list
+            size = ents.shape[0]
+            chunks = size // 4
+            
+            if chunks != 0:
+                ents = ents.reshape(chunks,-1)
+                
+            entity_list = ents[:10]
+            entity_list = non_max_suppression_fast(entity_list, 0.8)
+            return entity_list
     
     def get_stats(self):
         """
@@ -162,6 +165,7 @@ class MapleWrapper():
         """
         Starts extracting information from environment, given fps recommendation (slows down if computer can't 
         handle it). Merge this with agent. 
+        Leverages multi-processing.
 
         """
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
@@ -184,7 +188,6 @@ class MapleWrapper():
             self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
             
             # self.d.screenshot_to_disk(region=self.p_coords)
-            
             # cv2.imwrite("1.png",self.ui)
             
             # try:
