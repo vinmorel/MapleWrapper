@@ -14,6 +14,7 @@ from utils.nms import non_max_suppression_fast
 import time
 from PIL import Image, ImageDraw
 import sys 
+import concurrent.futures
 
 class MapleWrapper():
     def __init__(self):
@@ -30,7 +31,6 @@ class MapleWrapper():
         self.slash_t = cv2.imread(join(self.assets_pth,'slash2.png'),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,'bracket2.png'),0)
 
-        
 
     def single_template_matching(self, img, template, method=cv2.TM_CCORR_NORMED):
         """
@@ -65,9 +65,10 @@ class MapleWrapper():
         if nms:
             boxes = non_max_suppression_fast(boxes,0.2)
         return boxes
-
+    
     def get_player(self):
-        return self.single_template_matching(self.content, self.name_t)
+        player = self.single_template_matching(self.content, self.name_t)
+        return player
 
     def get_mobs(self):
         """
@@ -86,9 +87,9 @@ class MapleWrapper():
             ents = ents.reshape(chunks,-1)
             
         entity_list = ents[:10]
-
-        return non_max_suppression_fast(entity_list, 0.8)
-
+        entity_list = non_max_suppression_fast(entity_list, 0.8)
+        return entity_list
+    
     def get_stats(self):
         """
         Returns [HP, MP, EXP]
@@ -154,8 +155,7 @@ class MapleWrapper():
             self.d.stop()
             self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
             self.d.capture(target_fps=fps, region=self.p_coords)
-            time.sleep(0.5) 
-            print('updated')
+            time.sleep(0.2) 
         return 'updated'
 
     def start(self, fps=25):
@@ -167,7 +167,7 @@ class MapleWrapper():
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.d.capture(target_fps=fps, region=self.p_coords)
         # let D3dshot warm up
-        time.sleep(0.5)        
+        time.sleep(0.2)        
         
         i = 0
         while True:   
@@ -180,8 +180,6 @@ class MapleWrapper():
                 self.frame = cv2.resize(self.frame, (self.p_w, self.p_h))
                 self.p_w, self.p_h = self.gold
             
-            
-            
             self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
             self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
             
@@ -191,15 +189,17 @@ class MapleWrapper():
             
             # try:
             print(i)
-            i += 1
-
-            # print(self.get_mobs())
+            i += 1    
             
-            # mob_boxes = self.get_mobs()
-            play = self.get_mobs()
-            a = self.get_player()
-            b = self.get_stats()
-        
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                player = executor.submit(self.get_player)
+                stats = executor.submit(self.get_stats)
+                mobs = executor.submit(self.get_mobs)
+                a = player.result()
+                b = stats.result()
+                c = mobs.result()
+            
+            
                 # im = Image.fromarray(self.content)  
                 # d = ImageDraw.Draw(im)
                 # for box in mob_boxes:
