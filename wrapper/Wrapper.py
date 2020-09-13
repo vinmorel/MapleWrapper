@@ -4,17 +4,16 @@ Created on Fri Sep 11 12:55:00 2020
 
 @author: Vincent Morel
 """
-import numpy as np
+
 import cv2
-from os import listdir
-from os.path import join, isfile
+import time
 import d3dshot
+import numpy as np
+from os import listdir
+import concurrent.futures
+from os.path import join, isfile
 from utils.window_pos import process_coords
 from utils.nms import non_max_suppression_fast
-import time
-from PIL import Image, ImageDraw
-import sys 
-import concurrent.futures
 
 class MapleWrapper():
     def __init__(self):
@@ -164,13 +163,13 @@ class MapleWrapper():
     def start(self, fps=25):
         """
         Starts extracting information from environment, given fps recommendation (slows down if computer can't 
-        handle it). Merge this with agent. 
+        handle it). This information will be used by the agent. 
         Leverages multi-processing.
 
         """
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.d.capture(target_fps=fps, region=self.p_coords)
-        # let D3dshot warm up
+        # D3dshot warm up
         time.sleep(0.2)        
         
         i = 0
@@ -186,64 +185,19 @@ class MapleWrapper():
             
             self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
             self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
-            
-            # self.d.screenshot_to_disk(region=self.p_coords)
-            # cv2.imwrite("1.png",self.ui)
-            
-            # try:
-            print(i)
-            i += 1    
-            
+                          
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                player = executor.submit(self.get_player)
-                stats = executor.submit(self.get_stats)
-                mobs = executor.submit(self.get_mobs)
-                a = player.result()
-                b = stats.result()
-                c = mobs.result()
-            
-            
-                # im = Image.fromarray(self.content)  
-                # d = ImageDraw.Draw(im)
-                # for box in mob_boxes:
-                #     d.rectangle([(box[0],box[1]),(box[2],box[3])], outline ="red", width=6)
-                    
-                # im.show()
-                
-            # im = Image.fromarray(w.content)
-            # im.show()
-            # im = Image.fromarray(w.ui)
-            # im.show()
+                t1 = executor.submit(self.get_player)
+                t2 = executor.submit(self.get_stats)
+                t3 = executor.submit(self.get_mobs)
+                player = t1.result()
+                stats = t2.result()
+                mobs = t3.result()
 
-                # im2 = Image.fromarray(w.ui)
-        
-                # im.show()
-                # im2.show()
-                 
-                # input('...')
-                # except (Exception) as e:
-                #     print(e)
-                #     self.d.stop()
-                #     sys.exit()
-            # except Exception as e:
-            #     print(e)
-            #     self.d.stop()
-            #     sys.exit()
-                   
-         
     def stop(self):
         self.d.stop()
 
 if __name__ == "__main__":
     w = MapleWrapper()
-
     w.start()
 
-
-        # im = Image.fromarray(crop)  
-        # d = ImageDraw.Draw(im)
-        # if numbers_list:
-        #     for box in numbers_list:
-        #         box = box[0].tolist()
-        #         d.rectangle([(box[0][0],box[0][1]),(box[0][2],box[0][3])], outline ="red", width=6)
-        # im.show()
