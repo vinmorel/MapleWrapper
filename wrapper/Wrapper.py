@@ -7,6 +7,7 @@ Created on Fri Sep 11 12:55:00 2020
 
 import cv2
 import time
+import pathlib
 import d3dshot
 import numpy as np
 from os import listdir
@@ -15,21 +16,22 @@ from os.path import join, isfile
 from utils.window_pos import process_coords
 from utils.nms import non_max_suppression_fast
 
+
 class MapleWrapper():
     def __init__(self):
+        self.wdir = pathlib.Path(__file__).parent.parent.absolute()
+        self.assets_pth = join(self.wdir,"testing","assets")
         self.p_coords = process_coords("MapleStory")
         self.p_w = self.p_coords[2] - self.p_coords[0]
         self.p_h = self.p_coords[3] - self.p_coords[1]
         self.gold = (806, 629)
-        self.content_frame = [int(0.3*self.p_h), int(0.75*self.p_h), int(0.1*self.p_w), int(0.9*self.p_w)]
-        self.ui_frame = [int(0.9348 * self.p_h), None, None, int(0.7047 * self.p_w)]
-        self.assets_pth = "C:/Users/vin_m/Desktop/BitBucket/MB/maplebot/testing/assets/"
+        self.content_frame = [int(0.3*self.gold[1]), int(0.75*self.gold[1]), int(0.1*self.gold[0]), int(0.9*self.gold[0])]
+        self.ui_frame = [int(0.9348 * self.gold[1]), None, None, int(0.7047 * self.gold[0])]
         self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
         self.mobs_t = [cv2.imread(join(self.assets_pth, "monsters/", f),0) for f in sorted(listdir(join(self.assets_pth,"monsters/"))) if isfile(join(self.assets_pth,"monsters/", f))]
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers/"))) if isfile(join(self.assets_pth,"numbers/", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,'slash2.png'),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,'bracket2.png'),0)
-
 
     def single_template_matching(self, img, template, method=cv2.TM_CCORR_NORMED):
         """
@@ -160,7 +162,7 @@ class MapleWrapper():
             time.sleep(0.2) 
         return 'updated'
 
-    def start(self, fps=25):
+    def start(self, fps=25, v=0):
         """
         Starts extracting information from environment, given fps recommendation (slows down if computer can't 
         handle it). This information will be used by the agent. 
@@ -173,19 +175,16 @@ class MapleWrapper():
         time.sleep(0.2)        
         
         i = 0
-        while True:   
+        while True: 
             self.update_region(fps)
-            
             self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
             
             if self.different_ratio():
-                print(self.p_w, self.p_h)
-                self.frame = cv2.resize(self.frame, (self.p_w, self.p_h))
-                self.p_w, self.p_h = self.gold
+                self.frame = cv2.resize(self.frame, (self.gold[0], self.gold[1]))
             
             self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
             self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
-                          
+            
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 t1 = executor.submit(self.get_player)
                 t2 = executor.submit(self.get_stats)
@@ -193,11 +192,14 @@ class MapleWrapper():
                 player = t1.result()
                 stats = t2.result()
                 mobs = t3.result()
-
+                if v: 
+                    print(i,'\n',player,'\n',stats,'\n',mobs)
+                    i += 1
+            
     def stop(self):
         self.d.stop()
 
 if __name__ == "__main__":
     w = MapleWrapper()
-    w.start()
+    w.start(v=True)
 
