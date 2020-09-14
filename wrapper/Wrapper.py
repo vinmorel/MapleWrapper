@@ -162,44 +162,50 @@ class MapleWrapper():
             time.sleep(0.2) 
         return 'updated'
 
-    def start(self, fps=25, v=0):
+    def start(self, fps=25):
         """
-        Starts extracting information from environment, given fps recommendation (slows down if computer can't 
-        handle it). This information will be used by the agent. 
-        Leverages multi-processing.
+        Starts capturing frames from environment, given fps recommendation (slows down if 
+        computer can't handle it). 
 
         """
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
-        self.d.capture(target_fps=fps, region=self.p_coords)
-        # D3dshot warm up
-        time.sleep(0.2)        
+        self.d.capture(target_fps=fps, region=self.p_coords)      
         
-        i = 0
-        while True: 
-            self.update_region(fps)
-            self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
+    def observe(self,fps=25, v=0):
+        """
+        Extracts information from the latest frame in buffer by leveraging multi-processing. 
+        This information will be used by the agent. 
+        """
+        self.update_region(fps)
+        self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
             
-            if self.different_ratio():
-                self.frame = cv2.resize(self.frame, (self.gold[0], self.gold[1]))
+        if self.different_ratio():
+            self.frame = cv2.resize(self.frame, (self.gold[0], self.gold[1]))
             
-            self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
-            self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
-            
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                t1 = executor.submit(self.get_player)
-                t2 = executor.submit(self.get_stats)
-                t3 = executor.submit(self.get_mobs)
-                player = t1.result()
-                stats = t2.result()
-                mobs = t3.result()
-                if v: 
-                    print(i,'\n',player,'\n',stats,'\n',mobs)
-                    i += 1
-            
+        self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
+        self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
+        
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            t1 = executor.submit(self.get_player)
+            t2 = executor.submit(self.get_stats)
+            t3 = executor.submit(self.get_mobs)
+            player = t1.result()
+            stats = t2.result()
+            mobs = t3.result()
+            if v: print('\n',player,'\n',stats,'\n',mobs)
+
     def stop(self):
         self.d.stop()
 
-if __name__ == "__main__":
+if __name__ == "__main__":   
     w = MapleWrapper()
-    w.start(v=True)
+    w.start()
+    
+    i = 0
+    while True:
+        w.observe(v=1)
+        i += 1
+        
+
+        
 
