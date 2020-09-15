@@ -16,7 +16,6 @@ from os.path import join, isfile
 from utils.window_pos import process_coords
 from utils.nms import non_max_suppression_fast
 
-
 class MapleWrapper():
     def __init__(self):
         self.wdir = pathlib.Path(__file__).resolve().parents[1]
@@ -29,6 +28,7 @@ class MapleWrapper():
         self.ui_frame = [int(0.9348 * self.gold[1]), None, None, int(0.7047 * self.gold[0])]
         self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
         self.mobs_t = [cv2.imread(join(self.assets_pth, "monsters/", f),0) for f in sorted(listdir(join(self.assets_pth,"monsters/"))) if isfile(join(self.assets_pth,"monsters/", f))]
+        self.lvl_numbers_t = [cv2.imread(join(self.assets_pth, "lvl_numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"lvl_numbers/"))) if isfile(join(self.assets_pth,"lvl_numbers/", f))]
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers/"))) if isfile(join(self.assets_pth,"numbers/", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,'slash2.png'),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,'bracket2.png'),0)
@@ -96,44 +96,43 @@ class MapleWrapper():
     
     def get_stats(self):
         """
-        Returns [HP, MP, EXP]
+        Returns [LVL, HP, MP, EXP]
         Crops the UI into close ups of stat numbers dynamically with template matchings of x1 extremities.
         Matches numbers with crops to deduct the digits (alternative to using Tesseract which is very slow) 
         """
         coords = {
-        # 'lvl' : [41, 9, 78, 33],
+        'LVL' : [40, 14, 76, 28],
         'HP' : [243, 9, None, 18],
         'MP' : [354, 9, None, 18],
         'EXP' : [467, 9, None, 18]
         }
         
-        slashes = self.multi_template_matching(self.ui, self.slash_t, 0.75)
-        x1s = np.sort(slashes[:,0])        
-        
-        brackets = self.multi_template_matching(self.ui, self.bracket_t, 0.9)
-        x2s = np.sort(brackets[:,0])
+        x1_hp_mp = self.get_pos_x0(self.ui, self.slash_t, 0.75)
+        x1_exp = self.get_pos_x0(self.ui, self.bracket_t, 0.9)
         
         buffer = 2
         
-        coords['HP'][2] = x1s[0] + buffer
-        coords['MP'][2] = x1s[1] + buffer
-        coords['EXP'][2] = x2s[2] + buffer
+        coords['HP'][2] = x1_hp_mp[0] + buffer
+        coords['MP'][2] = x1_hp_mp[1] + buffer
+        coords['EXP'][2] = x1_exp[2] + buffer
         
         stats = []
         
         for k,v in coords.items():
             crop = self.ui[v[1]:v[3], v[0]:v[2]]
-            
-            stat = self.get_numbers(crop)
+            if k == 'LVL':
+                stat = self.get_numbers(crop, self.lvl_numbers_t)
+            else:
+                stat = self.get_numbers(crop, self.numbers_t)
             stats.append(stat)
         return stats
     
-    def get_numbers(self, crop):
+    def get_numbers(self, crop, templates):
         """
         Returns INT of numbers present in crop  
         """
         numbers_list = []
-        for i, template in enumerate(self.numbers_t):                        
+        for i, template in enumerate(templates):                        
             matches = self.multi_template_matching(crop, template, 0.95, cv2.TM_CCOEFF_NORMED, nms=False)
 
             if type(matches) != list:                
@@ -141,15 +140,21 @@ class MapleWrapper():
                     numbers_list.append([int(match[0]),str(i)])
         
         numbers_list = sorted(numbers_list, key = lambda x: int(x[0]))  
-        
         stat = ""
-        
         for num in numbers_list:
             stat += num[1]
-        
         return int(stat)
         
+    def get_pos_x0(self, ui, template, thresh):
+        """
+        Returns list [x1, ...] of the position(s) x0(s) of templates in UI.
+        """
+        x1 = self.multi_template_matching(ui, template, thresh)
+        x1 = np.sort(x1[:,0])
+        return x1
+    
     def different_ratio(self):
+        """ Returns Bool [True/False] if current window size is same as gold size"""
         return (self.p_w != self.gold[0] or self.p_h != self.gold[1])
 
     def update_region(self, fps):
@@ -194,7 +199,7 @@ class MapleWrapper():
             stats = t2.result()
             mobs = t3.result()
             if v: print('\n',player,'\n',stats,'\n',mobs)
-
+    
     def stop(self):
         self.d.stop()
 
@@ -202,9 +207,10 @@ if __name__ == "__main__":
     w = MapleWrapper()
     w.start()
     
+    w.observe()
     i = 0
     while True:
-        w.observe(v=1)
+        w.observe(v=0)
         i += 1
         
 
