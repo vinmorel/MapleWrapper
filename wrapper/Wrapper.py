@@ -20,7 +20,6 @@ from utils.nms import non_max_suppression_fast
 class MapleWrapper():
     def __init__(self):
         self.wdir = pathlib.Path(__file__).resolve().parents[1]
-        print(self.wdir)
         self.assets_pth = join(self.wdir,"testing","assets")
         self.p_coords = process_coords("MapleStory")
         self.p_w = self.p_coords[2] - self.p_coords[0]
