@@ -19,7 +19,8 @@ from utils.nms import non_max_suppression_fast
 
 class MapleWrapper():
     def __init__(self):
-        self.wdir = pathlib.Path(__file__).parent.parent.absolute()
+        self.wdir = pathlib.Path(__file__).resolve().parents[1]
+        print(self.wdir)
         self.assets_pth = join(self.wdir,"testing","assets")
         self.p_coords = process_coords("MapleStory")
         self.p_w = self.p_coords[2] - self.p_coords[0]
@@ -169,7 +170,8 @@ class MapleWrapper():
 
         """
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
-        self.d.capture(target_fps=fps, region=self.p_coords)      
+        self.d.capture(target_fps=fps, region=self.p_coords)     
+        time.sleep(0.2)
         
     def observe(self,fps=25, v=0):
         """
