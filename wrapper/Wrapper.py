@@ -207,10 +207,9 @@ if __name__ == "__main__":
     w = MapleWrapper()
     w.start()
     
-    w.observe()
     i = 0
     while True:
-        w.observe(v=0)
+        w.observe(v=1)
         i += 1
         
 
