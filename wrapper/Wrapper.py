@@ -13,14 +13,16 @@ import numpy as np
 from os import listdir
 import concurrent.futures
 from os.path import join, isfile
-from utils.window_pos import process_coords
+from utils.window_pos import process_coords, get_cname
 from utils.nms import non_max_suppression_fast
+from PIL import Image
 
 class MapleWrapper():
     def __init__(self):
         self.wdir = pathlib.Path(__file__).resolve().parents[1]
         self.assets_pth = join(self.wdir,"testing","assets")
-        self.p_coords = process_coords("MapleStory")
+        self.cname = get_cname('MapleStory')
+        self.p_coords = process_coords(self.cname)
         self.p_w = self.p_coords[2] - self.p_coords[0]
         self.p_h = self.p_coords[3] - self.p_coords[1]
         self.gold = (806, 629)
@@ -158,7 +160,7 @@ class MapleWrapper():
         return (self.p_w != self.gold[0] or self.p_h != self.gold[1])
 
     def update_region(self, fps):
-        p_coords = process_coords("MapleStory")
+        p_coords = process_coords(self.cname)
         if self.p_coords != p_coords:
             self.p_coords = p_coords
             self.d.stop()
