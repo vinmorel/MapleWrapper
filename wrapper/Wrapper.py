@@ -26,8 +26,8 @@ class MapleWrapper():
         self.p_w = self.p_coords[2] - self.p_coords[0]
         self.p_h = self.p_coords[3] - self.p_coords[1]
         self.gold = (806, 629)
-        self.content_frame = [int(0.3*self.gold[1]), int(0.75*self.gold[1]), int(0.1*self.gold[0]), int(0.9*self.gold[0])]
-        self.ui_frame = [int(0.9348 * self.gold[1]), None, None, int(0.7047 * self.gold[0])]
+        self.content_frame = [int(0.3*self.p_h), int(0.75*self.p_h), int(0.1*self.p_w), int(0.9*self.p_w)]
+        self.ui_frame = [int(self.p_h - 41.01), None, None, int(0.7047 * self.gold[0])]
         self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
         self.mobs_t = [cv2.imread(join(self.assets_pth, "monsters/", f),0) for f in sorted(listdir(join(self.assets_pth,"monsters/"))) if isfile(join(self.assets_pth,"monsters/", f))]
         self.lvl_numbers_t = [cv2.imread(join(self.assets_pth, "lvl_numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"lvl_numbers/"))) if isfile(join(self.assets_pth,"lvl_numbers/", f))]
@@ -186,13 +186,10 @@ class MapleWrapper():
         """
         self.update_region(fps)
         self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
-            
-        if self.different_ratio():
-            self.frame = cv2.resize(self.frame, (self.gold[0], self.gold[1]))
-            
+                       
         self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
         self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
-        
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             t1 = executor.submit(self.get_player)
             t2 = executor.submit(self.get_stats)
