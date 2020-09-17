@@ -20,7 +20,7 @@ def callback(hwnd, extra):
     cname = win32gui.GetClassName(hwnd)
     class_names.append(cname)
 
-def get_cname(search_term):
+def get_classname(search_term):
     win32gui.EnumWindows(callback, None)
     cname = [i for i in class_names if search_term in i]
     return cname[0]
