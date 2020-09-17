@@ -96,18 +96,18 @@ class MapleWrapper():
             entity_list = non_max_suppression_fast(entity_list, 0.8)
             return entity_list
     
-    def get_stats(self):
+    def get_stats(self, investigate=False):
         """
         Returns [LVL, HP, MP, EXP]
         Crops the UI into close ups of stat numbers dynamically with template matchings of x1 extremities.
         Matches numbers with crops to deduct the digits (alternative to using Tesseract which is very slow) 
         """
         coords = {
-        'LVL' : [40, 14, 76, 28],
-        'HP' : [243, 9, None, 18],
-        'MP' : [354, 9, None, 18],
-        'EXP' : [467, 9, None, 18]
-        }
+            'LVL' : [40, 14, 76, 28],
+            'HP' : [243, 9, None, 18],
+            'MP' : [354, 9, None, 18],
+            'EXP' : [467, 9, None, 18]
+        }   
         
         x1_hp_mp = self.get_pos_x0(self.ui, self.slash_t, 0.75)
         x1_exp = self.get_pos_x0(self.ui, self.bracket_t, 0.9)
@@ -119,16 +119,23 @@ class MapleWrapper():
         coords['EXP'][2] = x1_exp[2] + buffer
         
         stats = []
-        
-        for k,v in coords.items():
-            crop = self.ui[v[1]:v[3], v[0]:v[2]]
-            if k == 'LVL':
-                stat = self.get_numbers(crop, self.lvl_numbers_t)
-            else:
-                stat = self.get_numbers(crop, self.numbers_t)
-            stats.append(stat)
+
+        if investigate:
+            for k,v in coords.items():
+                crop = [v[0], v[1], v[2], v[3]]
+                stats.append(crop)
+
+        else:
+            for k,v in coords.items():
+                crop = self.ui[v[1]:v[3], v[0]:v[2]]
+                if k == 'LVL':
+                    stat = self.get_numbers(crop, self.lvl_numbers_t)
+                else:
+                    stat = self.get_numbers(crop, self.numbers_t)
+                stats.append(stat)
+
         return stats
-    
+
     def get_numbers(self, crop, templates):
         """
         Returns INT of numbers present in crop  
@@ -178,17 +185,24 @@ class MapleWrapper():
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.d.capture(target_fps=fps, region=self.p_coords)     
         time.sleep(0.2)
-        
+
+    def get_aoi(self, game_window, clr_mode):
+        """
+        Crops the areas of interest (frame, content, ui) from the game_window given a color mode 
+        [cv2.COLOR_BGR2GRAY or cv2.COLOR_RGB2BGR].
+        """
+        frame = cv2.cvtColor(game_window, clr_mode)
+        content = frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
+        ui = frame[self.ui_frame[0]:, :self.ui_frame[3]]
+        return frame, content, ui
+
     def observe(self,fps=25, v=0):
         """
         Extracts information from the latest frame in buffer by leveraging multi-processing. 
         This information will be used by the agent. 
         """
         self.update_region(fps)
-        self.frame = cv2.cvtColor(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
-                       
-        self.content =self.frame[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
-        self.ui = self.frame[self.ui_frame[0]:, :self.ui_frame[3]]
+        self.frame, self.content, self.ui = self.get_aoi(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             t1 = executor.submit(self.get_player)
@@ -202,6 +216,42 @@ class MapleWrapper():
     def stop(self):
         self.d.stop()
 
+    def inspect(self, view):
+        """
+        Displays an image and template detections of a view for debugging. 
+        views : [frame, content, ui, player, mobs, stats]
+        """
+        self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
+        game_window = self.d.screenshot(region=self.p_coords)  
+        
+        clr_frame, clr_content, clr_ui = self.get_aoi(game_window, cv2.COLOR_RGB2BGR)
+        self.frame, self.content, self.ui = self.get_aoi(game_window, cv2.COLOR_BGR2GRAY)
+
+        items = {
+            'frame' : [clr_frame, None],
+            'content' : [clr_content, None],
+            'ui' : [clr_ui, None],
+            'player' : [clr_content, self.get_player],
+            'mobs' : [clr_content, self.get_mobs],
+            'stats' : [clr_ui, self.get_stats]
+        }
+
+        image = items[view][0]
+        clr = (0, 0, 255)
+        width = 1
+  
+        if items[view][1] != None:
+            boxes = items[view][1]() if (view != 'stats') else items[view][1](True)
+            if view == 'player':
+                image = cv2.rectangle(image, (boxes[0],boxes[1]), (boxes[2],boxes[3]), clr, width) 
+            else:
+                for box in boxes:
+                    image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3]), clr , width)
+
+        cv2.imshow(f"{view}", image)
+        cv2.waitKey()
+        cv2.destroyAllWindows()
+
 if __name__ == "__main__":   
     w = MapleWrapper()
     w.start()
@@ -211,6 +261,6 @@ if __name__ == "__main__":
         w.observe(v=1)
         i += 1
         
-
+    # w.inspect('frame')
         
 
