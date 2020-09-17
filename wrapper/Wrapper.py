@@ -37,7 +37,7 @@ class MapleWrapper():
         self.slash_t = cv2.imread(join(self.assets_pth,"general","slash.png"),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,"general","bracket.png"),0)
 
-    def single_template_matching(self, img, template, method=cv2.TM_CCORR_NORMED):
+    def single_template_matching(self, img, template, method=cv2.TM_CCOEFF):
         """
         returns int32 numpy array of best template match 
         [x0, y1, x1, y1]
@@ -260,13 +260,13 @@ class MapleWrapper():
         
 if __name__ == "__main__":   
     w = MapleWrapper('smashy')
-    # w.start()
+    w.start()
     
-    # i = 0
-    # while True:
-    #     w.observe(v=1)
-    #     i += 1
-    # print(w.name_t)
-    w.inspect('player')
+    i = 0
+    while True:
+        w.observe(v=1)
+        i += 1
+
+    # w.inspect('player')
         
 
