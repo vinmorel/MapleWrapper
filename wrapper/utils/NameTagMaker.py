@@ -11,17 +11,24 @@ def make_tag(name):
     nametag_im = cv2.imread(join(nametag_characters_pth, "space.png"),0)
 
     for l in name:
-        char = cv2.imread(join(nametag_characters_pth, f"{l}.png"),0)
-        space = cv2.imread(join(nametag_characters_pth, "space.png"),0)
-        new_chars = cv2.hconcat([char,space])
+        if l != " ":
+            if l.isupper():
+                char = cv2.imread(join(nametag_characters_pth, f"{l}_.png"),0)
+            else:
+                char = cv2.imread(join(nametag_characters_pth, f"{l}.png"),0)
 
-        nametag_im = cv2.hconcat([nametag_im, new_chars])
+            space = cv2.imread(join(nametag_characters_pth, "blank.png"),0)
+            new_chars = cv2.hconcat([char,space])
+            nametag_im = cv2.hconcat([nametag_im, new_chars])
+        else:
+            space = cv2.imread(join(nametag_characters_pth, "space.png"),0)
+            nametag_im = cv2.hconcat([nametag_im, space])
 
     return nametag_im
 
 
 if __name__ == "__main__":
-    nametag = make_tag('abcdefghijklm')
+    nametag = make_tag('Pink Bunny')
 
     cv2.imshow("test", nametag)
     cv2.waitKey()
