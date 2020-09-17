@@ -26,7 +26,7 @@ class MapleWrapper():
         self.p_w = self.p_coords[2] - self.p_coords[0]
         self.p_h = self.p_coords[3] - self.p_coords[1]
         self.gold = (806, 629)
-        self.content_frame = [int(0.3*self.p_h), int(0.75*self.p_h), int(0.1*self.p_w), int(0.9*self.p_w)]
+        self.content_frame = [int(0.45*self.p_h), int(0.85*self.p_h), 0, int(self.p_w)]
         self.ui_frame = [int(self.p_h - 41.01), None, None, int(0.7047 * self.gold[0])]
         self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
         self.mobs_t = [cv2.imread(join(self.assets_pth, "monsters/", f),0) for f in sorted(listdir(join(self.assets_pth,"monsters/"))) if isfile(join(self.assets_pth,"monsters/", f))]
@@ -247,20 +247,22 @@ class MapleWrapper():
             else:
                 for box in boxes:
                     image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3]), clr , width)
-
+        
+        self.d.stop()
         cv2.imshow(f"{view}", image)
         cv2.waitKey()
         cv2.destroyAllWindows()
+        
 
 if __name__ == "__main__":   
     w = MapleWrapper()
     w.start()
     
-    i = 0
-    while True:
-        w.observe(v=1)
-        i += 1
+    # i = 0
+    # while True:
+    #     w.observe(v=1)
+    #     i += 1
         
-    # w.inspect('frame')
+    w.inspect('content')
         
 
