@@ -13,14 +13,15 @@ import numpy as np
 from os import listdir
 import concurrent.futures
 from os.path import join, isfile
+from utils.NameTagMaker import make_tag
 from utils.window_pos import process_coords, get_cname
 from utils.nms import non_max_suppression_fast
 from PIL import Image
 
 class MapleWrapper():
-    def __init__(self):
-        self.wdir = pathlib.Path(__file__).resolve().parents[1]
-        self.assets_pth = join(self.wdir,"testing","assets")
+    def __init__(self, player_name):
+        self.wdir = pathlib.Path(__file__).resolve().parents[0]
+        self.assets_pth = join(self.wdir,"templates")
         self.cname = get_cname('MapleStory')
         self.p_coords = process_coords(self.cname)
         self.p_w = self.p_coords[2] - self.p_coords[0]
@@ -28,12 +29,13 @@ class MapleWrapper():
         self.gold = (806, 629)
         self.content_frame = [int(0.45*self.p_h), int(0.85*self.p_h), 0, int(self.p_w)]
         self.ui_frame = [int(self.p_h - 41.01), None, None, int(0.7047 * self.gold[0])]
-        self.name_t = cv2.imread(join(self.assets_pth,'NameTag2.png'),0)
-        self.mobs_t = [cv2.imread(join(self.assets_pth, "monsters/", f),0) for f in sorted(listdir(join(self.assets_pth,"monsters/"))) if isfile(join(self.assets_pth,"monsters/", f))]
-        self.lvl_numbers_t = [cv2.imread(join(self.assets_pth, "lvl_numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"lvl_numbers/"))) if isfile(join(self.assets_pth,"lvl_numbers/", f))]
-        self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers/", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers/"))) if isfile(join(self.assets_pth,"numbers/", f))]
-        self.slash_t = cv2.imread(join(self.assets_pth,'slash2.png'),0)
-        self.bracket_t = cv2.imread(join(self.assets_pth,'bracket2.png'),0)
+        # self.name_t = cv2.imread(join(self.assets_pth,"general",'nametag.png'),0)
+        self.name_t = make_tag(player_name)
+        self.mobs_t = [cv2.imread(join(self.assets_pth, "mobs", f),0) for f in sorted(listdir(join(self.assets_pth,"mobs"))) if isfile(join(self.assets_pth,"mobs", f))]
+        self.lvl_numbers_t = [cv2.imread(join(self.assets_pth, "numbers_lvl", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers_lvl"))) if isfile(join(self.assets_pth,"numbers_lvl/", f))]
+        self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers"))) if isfile(join(self.assets_pth,"numbers", f))]
+        self.slash_t = cv2.imread(join(self.assets_pth,"general","slash.png"),0)
+        self.bracket_t = cv2.imread(join(self.assets_pth,"general","bracket.png"),0)
 
     def single_template_matching(self, img, template, method=cv2.TM_CCORR_NORMED):
         """
@@ -216,7 +218,7 @@ class MapleWrapper():
     def stop(self):
         self.d.stop()
 
-    def inspect(self, view):
+    def inspect(self, view, save_to_disk=False):
         """
         Displays an image and template detections of a view for debugging. 
         views : [frame, content, ui, player, mobs, stats]
@@ -248,21 +250,23 @@ class MapleWrapper():
                 for box in boxes:
                     image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3]), clr , width)
         
+        if save_to_disk:
+            cv2.imwrite(f"{view}.png", image)
+
         self.d.stop()
         cv2.imshow(f"{view}", image)
         cv2.waitKey()
         cv2.destroyAllWindows()
         
-
 if __name__ == "__main__":   
-    w = MapleWrapper()
-    w.start()
+    w = MapleWrapper('smashy')
+    # w.start()
     
     # i = 0
     # while True:
     #     w.observe(v=1)
     #     i += 1
-        
-    w.inspect('content')
+    # print(w.name_t)
+    w.inspect('player')
         
 

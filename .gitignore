@@ -1,3 +1,4 @@
+/wrapper/templates/mobs/*
 /testing
 __pycache__/
 *.py[cod]
