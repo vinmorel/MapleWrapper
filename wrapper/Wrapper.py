@@ -90,6 +90,7 @@ class MapleWrapper():
 
                     mobs_t.append(mob_im)
                     mobs_t.append(cv2.flip(mob_im, 1))
+            self.adjust = h - 30
         return mobs_t
 
     def blend_mobs(self, mob_t, content, k=1):
@@ -277,8 +278,7 @@ class MapleWrapper():
                 image = cv2.rectangle(image, (boxes[0],boxes[1]), (boxes[2],boxes[3]), clr, width) 
             elif view == 'mobs':
                 for box in boxes:
-                    adjust = 30    
-                    image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3] + adjust), clr , width)               
+                    image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3] + self.adjust), clr , width)               
             else:
                 for box in boxes:
                     image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3]), clr , width)
