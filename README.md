@@ -39,6 +39,17 @@ Mobs:   [[354  67 417  97]
 ```
 The _observe_ method returns three numpy array objects representing [x0, y0, x1, y1] coordinates for player and mobs and [LVL, HP, MP, EXP] for stats.  
 
+Alternatively,
+```python
+from wrapper import MapleWrapper
+
+w = MapleWrapper('Your_Player_IGN', mobs=['Mob_Name'])
+
+w.start()
+player, stats, mobs = w.observe()
+w.stop()
+```
+
 **Debug Wrapper**
 
 ```python
