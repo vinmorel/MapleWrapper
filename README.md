@@ -47,9 +47,6 @@ from wrapper import MapleWrapper
 w = MapleWrapper('smashy', mobs=['Blue Snail'])
 w.inspect('mobs')
 ```
-```
-Out[1]: 
-```
 ![](/assets/mobs.png) 
 
 The _investigate_ method displays the image crop of what the wrapper sees during data extraction. It will also display an overlay of the bounding box of preditions when applicable.
