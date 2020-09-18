@@ -55,7 +55,7 @@ w.stop()
 ```python
 from wrapper import MapleWrapper
 
-w = MapleWrapper('smashy', mobs=['Blue Snail'])
+w = MapleWrapper('smashy', mobs=['Red Snail'])
 w.inspect('mobs')
 ```
 ![](/assets/mobs.png) 
