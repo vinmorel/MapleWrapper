@@ -16,7 +16,7 @@ from wrapper import MapleWrapper
 
 w = MapleWrapper('Your_Player_IGN', mobs=['Mob_Name'])
 ```
-You instanciate the wrapper by passing your player in-game name and a list of valid mob names (see [handbook](/wrapper/utils/mobs.txt)) that you would like to detect. 
+You instanciate the wrapper by passing your player in-game name and a list of valid mob names (see [handbook](/wrapper/utils/mobs.txt)) that you would like the wrapper to detect. 
 
 **Extract Game info**
 
