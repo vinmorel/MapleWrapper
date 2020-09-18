@@ -97,3 +97,7 @@ Most of the information is extracted using OpenCV image processing methods like 
 * The player position is located using a generated nametag template and matched against the game screen. 
 * Similarly, the mobs are located using template matching. Sprites are downloaded from the [Maplestory.io](https://maplestory.io/) API and cached on your system for future use. This keeps the repo slim by preventing the push of unecessary image files. 
 * As for the player stats, a custom and efficient character recognition system is applied to the game ui.
+
+
+### Acknowledgement
+Thank you to the team at Serpent.AI for the awesome [D3DShot](https://github.com/SerpentAI/D3DShot) package.
