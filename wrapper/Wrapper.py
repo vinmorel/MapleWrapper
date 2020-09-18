@@ -18,7 +18,6 @@ from utils.NameTagMaker import make_tag
 from utils.fetch_mobs import download_sprites
 from utils.window_pos import process_coords, get_classname
 from utils.nms import non_max_suppression_fast
-from PIL import Image
 
 class MapleWrapper():
     def __init__(self, player_name, mobs=[]):
@@ -30,7 +29,9 @@ class MapleWrapper():
         self.p_h = self.p_coords[3] - self.p_coords[1]
         self.gold = (806, 629)
         self.content_frame = [int(0.35*self.p_h), int(0.85*self.p_h), 0, int(self.p_w)]
+        self.mob_frame = [0, int(0.5*(0.85*self.p_h)), int(0.05*self.p_w), int(0.95*self.p_w)]
         self.ui_frame = [int(self.p_h - 41.01), None, None, int(0.7047 * self.gold[0])]
+        self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.name_t = make_tag(player_name)
         self.lvl_numbers_t = [cv2.imread(join(self.assets_pth, "numbers_lvl", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers_lvl"))) if isfile(join(self.assets_pth,"numbers_lvl/", f))]
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers"))) if isfile(join(self.assets_pth,"numbers", f))]
@@ -76,9 +77,7 @@ class MapleWrapper():
     
     def initialize_mobs_t(self, mobs):
         mobs_t = []
-        d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
-        content = d.screenshot(region=self.p_coords)[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
-        d.stop()
+        content = self.d.screenshot(region=self.p_coords)[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
         for mob in mobs:
             download_sprites(mob)
             for template in sorted(listdir(join(self.assets_pth,"mobs", mob))):
@@ -112,7 +111,7 @@ class MapleWrapper():
         ents = np.array([], dtype=np.int32)
 
         with concurrent.futures.ThreadPoolExecutor() as executor: 
-            granular_entities = [executor.submit(self.multi_template_matching, self.content, template, threshold=0.8, method=cv2.TM_CCOEFF_NORMED, nms=False) for i, template in enumerate(self.mobs_t)]
+            granular_entities = [executor.submit(self.multi_template_matching, self.content[self.mob_frame[0]:self.mob_frame[1], self.mob_frame[2]:self.mob_frame[3]], template, threshold=0.8, method=cv2.TM_CCOEFF_NORMED, nms=False) for i, template in enumerate(self.mobs_t)]
             for ent in granular_entities:
                 ents = np.append(ents, ent.result())
             
@@ -201,7 +200,6 @@ class MapleWrapper():
         if self.p_coords != p_coords:
             self.p_coords = p_coords
             self.d.stop()
-            self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
             self.d.capture(target_fps=fps, region=self.p_coords)
             time.sleep(0.2) 
         return 'updated'
@@ -212,7 +210,6 @@ class MapleWrapper():
         computer can't handle it). 
 
         """
-        self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.d.capture(target_fps=fps, region=self.p_coords)     
         time.sleep(0.2)
 
@@ -251,18 +248,19 @@ class MapleWrapper():
         Displays an image and template detections of a view for debugging. 
         views : [frame, content, ui, player, mobs, stats]
         """
-        self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         game_window = self.d.screenshot(region=self.p_coords)  
         
         clr_frame, clr_content, clr_ui = self.get_aoi(game_window, cv2.COLOR_RGB2BGR)
+        clr_mob = clr_content[self.mob_frame[0]:self.mob_frame[1], self.mob_frame[2]:self.mob_frame[3]]
         self.frame, self.content, self.ui = self.get_aoi(game_window, cv2.COLOR_BGR2GRAY)
+        
 
         items = {
             'frame' : [clr_frame, None],
             'content' : [clr_content, None],
             'ui' : [clr_ui, None],
             'player' : [clr_content, self.get_player],
-            'mobs' : [clr_content, self.get_mobs],
+            'mobs' : [clr_mob, self.get_mobs],
             'stats' : [clr_ui, self.get_stats]
         }
 
@@ -295,8 +293,7 @@ if __name__ == "__main__":
     while True:
         w.observe(v=0)
         i += 1
-        print(i)
-
+        
     # w.inspect('mobs')
         
 
