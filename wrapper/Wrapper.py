@@ -62,7 +62,6 @@ class MapleWrapper():
 
         """
         res = cv2.matchTemplate(img,template,method)
-
         loc = np.where( res >= threshold)
         
         w, h = template.shape[::-1]
@@ -302,6 +301,4 @@ if __name__ == "__main__":
     #     w.observe(v=0)
     #     i += 1
         
-    w.inspect('mobs',)
-        
-
+    w.inspect('mobs')
