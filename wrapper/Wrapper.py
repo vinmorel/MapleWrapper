@@ -227,7 +227,7 @@ class MapleWrapper():
         ui = frame[self.ui_frame[0]:, :self.ui_frame[3]]
         return frame, content, ui
 
-    def observe(self,fps=25, v=0):
+    def observe(self,fps=25, verbose=0):
         """
         Extracts information from the latest frame in buffer by leveraging multi-processing. 
         This information will be used by the agent. 
@@ -242,8 +242,9 @@ class MapleWrapper():
             player = t1.result()
             stats = t2.result()
             mobs = t3.result()
-            if v: print('\n',player,'\n',stats,'\n',mobs)
-    
+            if verbose: print('\n Player:',player,'\n Stats:',stats,'\n Mobs:',mobs)
+        return player, stats, mobs
+
     def stop(self):
         self.d.stop()
 
@@ -270,7 +271,7 @@ class MapleWrapper():
 
         image = items[view][0]
         clr = (0, 0, 255)
-        width = 1
+        width = 2
   
         if items[view][1] != None:
             boxes = items[view][1]() if (view != 'stats') else items[view][1](True)
@@ -292,13 +293,15 @@ class MapleWrapper():
         cv2.destroyAllWindows()
         
 if __name__ == "__main__":   
-    w = MapleWrapper('smashy', mobs=['Orange Mushroom'])
+    w = MapleWrapper('smashy', mobs=['Red Snail'])
 
+    # w.observe(v=1)
+    # w.stop()
     # w.start()
-    
     # i = 0
     # while True:
-    #     w.observe(v=0)
+    #     w.observe(verbose=0)
     #     i += 1
+    #     print(i)
         
     w.inspect('mobs')
