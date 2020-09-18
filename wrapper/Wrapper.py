@@ -14,6 +14,7 @@ from os import listdir
 import concurrent.futures
 from os.path import join, isfile
 from utils.NameTagMaker import make_tag
+from utils.fetch_mobs import download_sprites
 from utils.window_pos import process_coords, get_classname
 from utils.nms import non_max_suppression_fast
 from PIL import Image
@@ -36,10 +37,12 @@ class MapleWrapper():
         self.bracket_t = cv2.imread(join(self.assets_pth,"general","bracket.png"),0)
         self.mobs_t = []
         for mob in mobs:
+            download_sprites(mob)
             for template in sorted(listdir(join(self.assets_pth,"mobs", mob))):
                 if isfile(join(self.assets_pth,"mobs", mob, template)):
-                    self.mobs_t.append(cv2.imread(join(self.assets_pth, "mobs", mob, template),0))
-
+                    mob_im = cv2.imread(join(self.assets_pth, "mobs", mob, template),0)
+                    self.mobs_t.append(mob_im)
+                    self.mobs_t.append(cv2.flip(mob_im, 1))
 
     def single_template_matching(self, img, template, method=cv2.TM_CCOEFF):
         """
@@ -263,13 +266,14 @@ class MapleWrapper():
         cv2.destroyAllWindows()
         
 if __name__ == "__main__":   
-    w = MapleWrapper('smashy', mobs=['BlueSnail'])
+    w = MapleWrapper('smashy', mobs=['Pig'])
     # w.start()
     
     # i = 0
     # while True:
-    #     w.observe(v=1)
+    #     w.observe(v=0)
     #     i += 1
+    #     print(i)
 
     w.inspect('mobs')
         
