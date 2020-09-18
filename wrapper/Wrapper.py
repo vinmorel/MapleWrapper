@@ -13,6 +13,7 @@ import numpy as np
 from os import listdir
 import concurrent.futures
 from os.path import join, isfile
+from utils.KNN import get_colors
 from utils.NameTagMaker import make_tag
 from utils.fetch_mobs import download_sprites
 from utils.window_pos import process_coords, get_classname
@@ -35,14 +36,8 @@ class MapleWrapper():
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers"))) if isfile(join(self.assets_pth,"numbers", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,"general","slash.png"),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,"general","bracket.png"),0)
-        self.mobs_t = []
-        for mob in mobs:
-            download_sprites(mob)
-            for template in sorted(listdir(join(self.assets_pth,"mobs", mob))):
-                if isfile(join(self.assets_pth,"mobs", mob, template)):
-                    mob_im = cv2.imread(join(self.assets_pth, "mobs", mob, template),0)
-                    self.mobs_t.append(mob_im)
-                    self.mobs_t.append(cv2.flip(mob_im, 1))
+        self.backg = cv2.imread("C:/Users/vin_m/Desktop/BitBucket/MB/maplebot/testing/assets/bckg.png",0)
+        self.mobs_t = self.initialize_mobs_t(mobs)
 
     def single_template_matching(self, img, template, method=cv2.TM_CCOEFF):
         """
@@ -66,6 +61,7 @@ class MapleWrapper():
 
         """
         res = cv2.matchTemplate(img,template,method)
+
         loc = np.where( res >= threshold)
         
         w, h = template.shape[::-1]
@@ -78,6 +74,31 @@ class MapleWrapper():
             boxes = non_max_suppression_fast(boxes,0.2)
         return boxes
     
+    def initialize_mobs_t(self, mobs):
+        mobs_t = []
+        d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
+        content = d.screenshot(region=self.p_coords)[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
+        d.stop()
+        for mob in mobs:
+            download_sprites(mob)
+            for template in sorted(listdir(join(self.assets_pth,"mobs", mob))):
+                if isfile(join(self.assets_pth,"mobs", mob, template)):
+                    clr_mob_im = cv2.imread(join(self.assets_pth, "mobs", mob, template),cv2.IMREAD_UNCHANGED)
+                    clr_mob_im = self.blend_mobs(clr_mob_im, content)
+                    mob_im = cv2.cvtColor(clr_mob_im, cv2.COLOR_BGR2GRAY)
+                    mobs_t.append(mob_im)
+                    mobs_t.append(cv2.flip(mob_im, 1))
+        return mobs_t
+
+    def blend_mobs(self, mob_t, content, k=1):
+        clrs = get_colors(content, k)
+        idx = np.random.randint(k, size=1)
+        chosen_clr = np.append(clrs[idx,:], [255])
+        trans_mask = mob_t[:,:,3] == 0
+
+        mob_t[trans_mask] = chosen_clr
+        return mob_t
+
     def get_player(self):
         player = self.single_template_matching(self.content, self.name_t)
         return player
@@ -90,8 +111,8 @@ class MapleWrapper():
         """
         ents = np.array([], dtype=np.int32)
 
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            granular_entities = [executor.submit(self.multi_template_matching, self.content, template, 0.6, cv2.TM_CCOEFF_NORMED, nms=False) for template in self.mobs_t]
+        with concurrent.futures.ThreadPoolExecutor() as executor: 
+            granular_entities = [executor.submit(self.multi_template_matching, self.content, template, threshold=0.8, method=cv2.TM_CCOEFF_NORMED, nms=False) for i, template in enumerate(self.mobs_t)]
             for ent in granular_entities:
                 ents = np.append(ents, ent.result())
             
@@ -102,7 +123,7 @@ class MapleWrapper():
                 ents = ents.reshape(chunks,-1)
                 
             entity_list = ents[:10]
-            entity_list = non_max_suppression_fast(entity_list, 0.8)
+            entity_list = non_max_suppression_fast(entity_list, 0.75)
             return entity_list
     
     def get_stats(self, investigate=False):
@@ -133,7 +154,7 @@ class MapleWrapper():
             for k,v in coords.items():
                 crop = [v[0], v[1], v[2], v[3]]
                 stats.append(crop)
-
+            
         else:
             for k,v in coords.items():
                 crop = self.ui[v[1]:v[3], v[0]:v[2]]
@@ -151,7 +172,7 @@ class MapleWrapper():
         """
         numbers_list = []
         for i, template in enumerate(templates):                        
-            matches = self.multi_template_matching(crop, template, 0.95, cv2.TM_CCOEFF_NORMED, nms=False)
+            matches = self.multi_template_matching(crop, template, 0.99, cv2.TM_CCOEFF_NORMED, nms=False)
 
             if type(matches) != list:                
                 for match in matches:
@@ -167,7 +188,7 @@ class MapleWrapper():
         """
         Returns list [x1, ...] of the position(s) x0(s) of templates in UI.
         """
-        x1 = self.multi_template_matching(ui, template, thresh)
+        x1 = self.multi_template_matching(ui, template, threshold=thresh, method=cv2.TM_CCOEFF_NORMED, nms=True)
         x1 = np.sort(x1[:,0])
         return x1
     
@@ -266,15 +287,16 @@ class MapleWrapper():
         cv2.destroyAllWindows()
         
 if __name__ == "__main__":   
-    w = MapleWrapper('smashy', mobs=['Pig'])
-    # w.start()
-    
-    # i = 0
-    # while True:
-    #     w.observe(v=0)
-    #     i += 1
-    #     print(i)
+    w = MapleWrapper('smashy', mobs=['Orange Mushroom'])
 
-    w.inspect('mobs')
+    w.start()
+    
+    i = 0
+    while True:
+        w.observe(v=0)
+        i += 1
+        print(i)
+
+    # w.inspect('mobs')
         
 
