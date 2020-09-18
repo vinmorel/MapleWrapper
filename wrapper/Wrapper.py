@@ -85,6 +85,10 @@ class MapleWrapper():
                     clr_mob_im = cv2.imread(join(self.assets_pth, "mobs", mob, template),cv2.IMREAD_UNCHANGED)
                     clr_mob_im = self.blend_mobs(clr_mob_im, content)
                     mob_im = cv2.cvtColor(clr_mob_im, cv2.COLOR_BGR2GRAY)
+                    h,w = mob_im.shape
+                    if h >= 50:
+                        mob_im = mob_im[:30,:]
+
                     mobs_t.append(mob_im)
                     mobs_t.append(cv2.flip(mob_im, 1))
         return mobs_t
@@ -272,6 +276,10 @@ class MapleWrapper():
             boxes = items[view][1]() if (view != 'stats') else items[view][1](True)
             if view == 'player':
                 image = cv2.rectangle(image, (boxes[0],boxes[1]), (boxes[2],boxes[3]), clr, width) 
+            elif view == 'mobs':
+                for box in boxes:
+                    adjust = 30    
+                    image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3] + adjust), clr , width)               
             else:
                 for box in boxes:
                     image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3]), clr , width)
@@ -287,13 +295,13 @@ class MapleWrapper():
 if __name__ == "__main__":   
     w = MapleWrapper('smashy', mobs=['Orange Mushroom'])
 
-    w.start()
+    # w.start()
     
-    i = 0
-    while True:
-        w.observe(v=0)
-        i += 1
+    # i = 0
+    # while True:
+    #     w.observe(v=0)
+    #     i += 1
         
-    # w.inspect('mobs')
+    w.inspect('mobs',)
         
 
