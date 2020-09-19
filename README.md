@@ -12,7 +12,7 @@ _A MapleStory GMS v.92 and below client wrapper for real-time game data extracti
 ### QuickStart Guide
 **Instantiate the MapleWrapper**
 ```python
-from MapleWrapper import wrapper
+from maplewrapper import wrapper
 
 w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
 ```
@@ -22,7 +22,7 @@ You instantiate the wrapper by passing your player in-game name and a list of va
 
 
 ```python
-from MapleWrapper import wrapper
+from maplewrapper import wrapper
 
 w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
 
@@ -41,7 +41,7 @@ The _observe_ method returns three numpy array objects representing [x0, y0, x1,
 
 Alternatively,
 ```python
-from MapleWrapper import wrapper
+from maplewrapper import wrapper
 
 w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
 
@@ -53,7 +53,7 @@ w.stop()
 **Debug Wrapper**
 
 ```python
-from MapleWrapper import wrapper
+from maplewrapper import wrapper
 
 w = wrapper('smashy', mobs=['Red Snail'])
 w.inspect('mobs')
