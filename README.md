@@ -55,7 +55,7 @@ w.stop()
 ```python
 from wrapper import MapleWrapper
 
-w = MapleWrapper('smashy', mobs=['Blue Snail'])
+w = MapleWrapper('smashy', mobs=['Red Snail'])
 w.inspect('mobs')
 ```
 ![](/assets/mobs.png) 
@@ -70,6 +70,7 @@ The required argument ```item``` can take the following values:
 * ```'mobs'``` : The cropped content frame and mobs detection overlay
 * ```'stats'``` : The ui frame and stats detection overlay
 
+You can save to disk by passing optional argument ```save_to_disk=True```
 
 ## Requirements
 * Windows 7 and up
