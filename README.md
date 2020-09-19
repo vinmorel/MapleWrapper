@@ -64,7 +64,7 @@ The _inspect_ method displays the image crop of what the wrapper sees during dat
 
 The required argument ```item``` can take the following values:
 * ```'frame'``` : The complete game frame
-* ```'content'``` : The cropped game grame containing game content such as the player and the mobs
+* ```'content'``` : The cropped game frame containing game content such as the player and the mobs
 * ```'ui'``` : The cropped game frame containing stats info
 * ```'player'``` : The content frame and player detection overlay 
 * ```'mobs'``` : The cropped content frame and mobs detection overlay
