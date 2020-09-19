@@ -1,6 +1,6 @@
 # MapleWrapper
 
-_A MapleStory GMS v.92 and below client wrapper for real-time game data extraction. Enables **you** to implement your own reinforcement learning environments._
+_A MapleStory GMS v.92 and below client wrapper for real-time game data extraction. Enables you to implement your own reinforcement learning environments._
 
 **MapleWrapper:**
 
@@ -10,13 +10,13 @@ _A MapleStory GMS v.92 and below client wrapper for real-time game data extracti
 * Is thredded FAST!
 
 ### QuickStart Guide
-**Instanciate the MapleWrapper**
+**Instantiate the MapleWrapper**
 ```python
 from wrapper import MapleWrapper
 
 w = MapleWrapper('Your_Player_IGN', mobs=['Mob_Name'])
 ```
-You instanciate the wrapper by passing your player in-game name and a list of valid mob names (see [handbook](/wrapper/utils/mobs.txt)) that you would like the wrapper to detect. 
+You instantiate the wrapper by passing your player in-game name and a list of valid mob names (see [handbook](/wrapper/utils/mobs.txt)) that you would like the wrapper to detect. 
 
 **Extract Game info**
 
@@ -60,15 +60,17 @@ w.inspect('mobs')
 ```
 ![](/assets/mobs.png) 
 
-The _investigate_ method displays the image crop of what the wrapper sees during data extraction. It will also display an overlay of the bounding box of preditions when applicable.
+The _inspect_ method displays the image crop of what the wrapper sees during data extraction. It will also display an overlay of the bounding box of preditions when applicable.
 
 The required argument ```item``` can take the following values:
 * ```'frame'``` : The complete game frame
-* ```'content'``` : The cropped game grame containg game content such as the player and the mobs
-* ```'ui'``` : The cropped game frame contained stats info
+* ```'content'``` : The cropped game grame containing game content such as the player and the mobs
+* ```'ui'``` : The cropped game frame containing stats info
 * ```'player'``` : The content frame and player detection overlay 
 * ```'mobs'``` : The cropped content frame and mobs detection overlay
 * ```'stats'``` : The ui frame and stats detection overlay
+* ```'nametag_t'``` : The generated nametag template
+* ```'mobs_t'``` : The generated mob templates
 
 You can save to disk by passing optional argument ```save_to_disk=True```
 
