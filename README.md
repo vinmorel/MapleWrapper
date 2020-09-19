@@ -84,7 +84,7 @@ You can save to disk by passing optional argument ```save_to_disk=True```
 ```
 git clone https://github.com/vinmorel/MapleWrapper.git
 ```
-**Install requirements**
+**Install**
 ```
 cd ./MapleWrapper
 pip install .
