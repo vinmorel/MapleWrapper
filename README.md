@@ -12,9 +12,9 @@ _A MapleStory GMS v.92 and below client wrapper for real-time game data extracti
 ### QuickStart Guide
 **Instantiate the MapleWrapper**
 ```python
-from wrapper import MapleWrapper
+from MapleWrapper import wrapper
 
-w = MapleWrapper('Your_Player_IGN', mobs=['Mob_Name'])
+w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
 ```
 You instantiate the wrapper by passing your player in-game name and a list of valid mob names (see [handbook](/wrapper/utils/mobs.txt)) that you would like the wrapper to detect. 
 
@@ -22,9 +22,9 @@ You instantiate the wrapper by passing your player in-game name and a list of va
 
 
 ```python
-from wrapper import MapleWrapper
+from MapleWrapper import wrapper
 
-w = MapleWrapper('Your_Player_IGN', mobs=['Mob_Name'])
+w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
 
 w.start()
 w.observe(verbose=1)
@@ -41,9 +41,9 @@ The _observe_ method returns three numpy array objects representing [x0, y0, x1,
 
 Alternatively,
 ```python
-from wrapper import MapleWrapper
+from MapleWrapper import wrapper
 
-w = MapleWrapper('Your_Player_IGN', mobs=['Mob_Name'])
+w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
 
 w.start()
 player, stats, mobs = w.observe()
@@ -53,9 +53,9 @@ w.stop()
 **Debug Wrapper**
 
 ```python
-from wrapper import MapleWrapper
+from MapleWrapper import wrapper
 
-w = MapleWrapper('smashy', mobs=['Red Snail'])
+w = wrapper('smashy', mobs=['Red Snail'])
 w.inspect('mobs')
 ```
 ![](/assets/mobs.png) 
@@ -87,9 +87,8 @@ git clone https://github.com/vinmorel/MapleWrapper.git
 **Install requirements**
 ```
 cd ./MapleWrapper
-pip install -r requirements.txt
+pip install .
 ```
-***Note: A setup.py will be included in the near future for easier imports***
 
 ### In-Depth Explanations
 The beauty of this wrapper comes from the fact that you don't have to do any dirty image manipulations yourself in order to adapt the wrapper to your system and needs. Everything is generated on the fly and cached for future use. 
