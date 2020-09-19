@@ -30,7 +30,8 @@ setup(
     package_data={'maplewrapper': ['templates/general/*png', 
                                     'templates/nametag_characters/*png',
                                     'templates/numbers/*png',
-                                    'templates/numbers_lvl/*png']},
+                                    'templates/numbers_lvl/*png',
+                                    'utils/*txt']},
     
     classifiers=[
         'Intended Audience :: Science/Research',

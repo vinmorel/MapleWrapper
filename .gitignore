@@ -1,4 +1,4 @@
-/wrapper/templates/mobs/*
+/maplewrapper/templates/mobs/*
 /testing
 __pycache__/
 *.py[cod]
