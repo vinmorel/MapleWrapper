@@ -299,16 +299,3 @@ class wrapper():
                 self.display(view, im)
         else:
             self.display(view, image)
-
-if __name__ == "__main__":   
-    w = wrapper('smashy', mobs=['Red Snail'])
-
-    # w.observe(v=1)
-    # w.stop()
-    # w.start()
-    # i = 0
-    # while True:
-    #     w.observe(verbose=0)
-    #     i += 1
-    #     print(i)
-    w.inspect('mobs')
