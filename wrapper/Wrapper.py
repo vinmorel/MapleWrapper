@@ -37,7 +37,6 @@ class MapleWrapper():
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers"))) if isfile(join(self.assets_pth,"numbers", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,"general","slash.png"),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,"general","bracket.png"),0)
-        self.backg = cv2.imread("C:/Users/vin_m/Desktop/BitBucket/MB/maplebot/testing/assets/bckg.png",0)
         self.mobs_t = self.initialize_mobs_t(mobs)
 
     def single_template_matching(self, img, template, method=cv2.TM_CCOEFF):
@@ -248,6 +247,11 @@ class MapleWrapper():
     def stop(self):
         self.d.stop()
 
+    def display(self, im_name, im):
+        cv2.imshow(f"{im_name}", im)
+        cv2.waitKey()
+        cv2.destroyAllWindows()        
+
     def inspect(self, view, save_to_disk=False):
         """
         Displays an image and template detections of a view for debugging. 
@@ -259,14 +263,15 @@ class MapleWrapper():
         clr_mob = clr_content[self.mob_frame[0]:self.mob_frame[1], self.mob_frame[2]:self.mob_frame[3]]
         self.frame, self.content, self.ui = self.get_aoi(game_window, cv2.COLOR_BGR2GRAY)
         
-
         items = {
             'frame' : [clr_frame, None],
             'content' : [clr_content, None],
             'ui' : [clr_ui, None],
             'player' : [clr_content, self.get_player],
             'mobs' : [clr_mob, self.get_mobs],
-            'stats' : [clr_ui, self.get_stats]
+            'stats' : [clr_ui, self.get_stats],
+            'nametag_t' : [self.name_t, None],
+            'mobs_t' : [self.mobs_t, None]
         }
 
         image = items[view][0]
@@ -288,10 +293,13 @@ class MapleWrapper():
             cv2.imwrite(f"{view}.png", image)
 
         self.d.stop()
-        cv2.imshow(f"{view}", image)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
-        
+
+        if type(items[view][0]) == list:
+            for im in items[view][0]:
+                self.display(view, im)
+        else:
+            self.display(view, image)
+
 if __name__ == "__main__":   
     w = MapleWrapper('smashy', mobs=['Red Snail'])
 
@@ -303,5 +311,4 @@ if __name__ == "__main__":
     #     w.observe(verbose=0)
     #     i += 1
     #     print(i)
-        
-    w.inspect('mobs')
+    w.inspect('nametag_t')
