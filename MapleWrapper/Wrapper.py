@@ -13,13 +13,13 @@ import numpy as np
 from os import listdir
 import concurrent.futures
 from os.path import join, isfile
-from utils.KNN import get_colors
-from utils.NameTagMaker import make_tag
-from utils.fetch_mobs import download_sprites
-from utils.window_pos import process_coords, get_classname
-from utils.nms import non_max_suppression_fast
+from MapleWrapper.utils.KNN import get_colors
+from MapleWrapper.utils.NameTagMaker import make_tag
+from MapleWrapper.utils.fetch_mobs import download_sprites
+from MapleWrapper.utils.window_pos import process_coords, get_classname
+from MapleWrapper.utils.nms import non_max_suppression_fast
 
-class MapleWrapper():
+class wrapper():
     def __init__(self, player_name, mobs=[]):
         self.wdir = pathlib.Path(__file__).resolve().parents[0]
         self.assets_pth = join(self.wdir,"templates")
@@ -301,7 +301,7 @@ class MapleWrapper():
             self.display(view, image)
 
 if __name__ == "__main__":   
-    w = MapleWrapper('smashy', mobs=['Red Snail'])
+    w = wrapper('smashy', mobs=['Red Snail'])
 
     # w.observe(v=1)
     # w.stop()
@@ -311,4 +311,4 @@ if __name__ == "__main__":
     #     w.observe(verbose=0)
     #     i += 1
     #     print(i)
-    w.inspect('nametag_t')
+    w.inspect('mobs')
