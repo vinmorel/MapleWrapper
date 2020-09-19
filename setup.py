@@ -17,8 +17,8 @@ setup(
     keywords='MapleStory Wrapper Reinforcement Learning',
     url='https://github.com/vinmorel/MapleWrapper',
     packages=[
-        'MapleWrapper', 
-        'MapleWrapper.utils', 
+        'maplewrapper', 
+        'maplewrapper.utils', 
     ],
     install_requires=[
         'd3dshot',
@@ -27,7 +27,7 @@ setup(
         'pywin32>=227',
         'pywin32-ctypes>=0.2.0'
     ],
-    package_data={'MapleWrapper': ['templates/general/*png', 
+    package_data={'maplewrapper': ['templates/general/*png', 
                                     'templates/nametag_characters/*png',
                                     'templates/numbers/*png',
                                     'templates/numbers_lvl/*png']},

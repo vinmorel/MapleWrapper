@@ -13,11 +13,11 @@ import numpy as np
 from os import listdir
 import concurrent.futures
 from os.path import join, isfile
-from MapleWrapper.utils.KNN import get_colors
-from MapleWrapper.utils.NameTagMaker import make_tag
-from MapleWrapper.utils.fetch_mobs import download_sprites
-from MapleWrapper.utils.window_pos import process_coords, get_classname
-from MapleWrapper.utils.nms import non_max_suppression_fast
+from maplewrapper.utils.KNN import get_colors
+from maplewrapper.utils.NameTagMaker import make_tag
+from maplewrapper.utils.fetch_mobs import download_sprites
+from maplewrapper.utils.window_pos import process_coords, get_classname
+from maplewrapper.utils.nms import non_max_suppression_fast
 
 class wrapper():
     def __init__(self, player_name, mobs=[]):
