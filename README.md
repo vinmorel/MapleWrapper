@@ -37,7 +37,7 @@ Stats:  [11, 261, 118, 7]
 Mobs:   [[354  67 417  97]
          [ 89  67 152  97]]
 ```
-The _observe_ method returns three numpy array objects representing [x0, y0, x1, y1] coordinates for player and mobs and [LVL, HP, MP, EXP] for stats.  
+The _observe_ method returns three numpy array objects representing [x0, y0, x1, y1] coordinates for player and mobs and [LVL, HP, MP, EXP] for stats. The _start_ and _stop_ methods respectively start and stop the game capture. 
 
 Alternatively,
 ```python
