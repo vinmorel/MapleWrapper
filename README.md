@@ -16,7 +16,7 @@ from maplewrapper import wrapper
 
 w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
 ```
-You instantiate the wrapper by passing your player in-game name and a list of valid mob names (see [handbook](/wrapper/utils/mobs.txt)) that you would like the wrapper to detect. 
+You instantiate the wrapper by passing your player in-game name and a list of valid mob names (see [handbook](/maplewrapper/utils/mobs.txt)) that you would like the wrapper to detect. 
 
 **Extract Game info**
 
