@@ -20,10 +20,10 @@ from maplewrapper.utils.window_pos import process_coords, get_classname
 from maplewrapper.utils.nms import non_max_suppression_fast
 
 class wrapper():
-    def __init__(self, player_name, mobs=[]):
+    def __init__(self, player_name, mobs=[], cname="MapleStory"):
         self.wdir = pathlib.Path(__file__).resolve().parents[0]
         self.assets_pth = join(self.wdir,"templates")
-        self.cname = get_classname('MapleStory')
+        self.cname = get_classname(cname)
         self.p_coords = process_coords(self.cname)
         self.p_w = self.p_coords[2] - self.p_coords[0]
         self.p_h = self.p_coords[3] - self.p_coords[1]
