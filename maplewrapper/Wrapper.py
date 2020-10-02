@@ -250,9 +250,9 @@ class wrapper():
 
     def get_basestats(self, investigate=False):
         """
-        Returns base of [LVL, HP, MP, EXP] 
-        Crops the UI into close ups of stat numbers dynamically with template matchings of x1 extremities.
-        Matches numbers with crops to deduct the digits (alternative to using Tesseract which is very slow) 
+        Returns base of [LVL, Base_HP, Base_MP, Base_EXP] 
+        This function is used to get the base stats of the player (total HP, total MP, total EXP until next level) 
+        Be careful not to confuse this with get_stats() which gets the dynamic LVL, HP, MP, EXP of the player
         """
         self.frame, self.content, self.ui = self.get_aoi(self.d.screenshot(region=self.p_coords), cv2.COLOR_BGR2GRAY)
 
