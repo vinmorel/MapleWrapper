@@ -16,6 +16,7 @@ from os.path import join, isfile
 from maplewrapper.utils.KNN import get_colors
 from maplewrapper.utils.NameTagMaker import make_tag
 from maplewrapper.utils.fetch_mobs import download_sprites
+from maplewrapper.utils.fetch_exp import get_expbase
 from maplewrapper.utils.window_pos import process_coords, get_classname
 from maplewrapper.utils.nms import non_max_suppression_fast
 
@@ -36,6 +37,7 @@ class wrapper():
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers"))) if isfile(join(self.assets_pth,"numbers", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,"general","slash.png"),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,"general","bracket.png"),0)
+        self.bracket_c_t = cv2.imread(join(self.assets_pth,"general","bracket_closing.png"),0)
         self.mobs_t = self.initialize_mobs_t(mobs)
 
     def single_template_matching(self, img, template, method=cv2.TM_CCOEFF):
@@ -185,12 +187,12 @@ class wrapper():
             stat += num[1]
         return int(stat)
         
-    def get_pos_x0(self, ui, template, thresh):
+    def get_pos_x0(self, ui, template, thresh, coord=0):
         """
         Returns list [x1, ...] of the position(s) x0(s) of templates in UI.
         """
         x1 = self.multi_template_matching(ui, template, threshold=thresh, method=cv2.TM_CCOEFF_NORMED, nms=True)
-        x1 = np.sort(x1[:,0])
+        x1 = np.sort(x1[:,coord])
         return x1
     
     def different_ratio(self):
@@ -246,6 +248,50 @@ class wrapper():
     def stop(self):
         self.d.stop()
 
+    def get_basestats(self, investigate=False):
+        """
+        Returns base of [LVL, HP, MP, EXP] 
+        Crops the UI into close ups of stat numbers dynamically with template matchings of x1 extremities.
+        Matches numbers with crops to deduct the digits (alternative to using Tesseract which is very slow) 
+        """
+        self.frame, self.content, self.ui = self.get_aoi(self.d.screenshot(region=self.p_coords), cv2.COLOR_BGR2GRAY)
+
+        coords = {
+            'LVL' : [40, 14, 76, 28],
+            'HP' : [None, 9, None, 18],
+            'MP' : [None, 9, None, 18],
+        }   
+        
+        x0_hp_mp = self.get_pos_x0(self.ui, self.slash_t, 0.75, 2)
+        x1_hp_mp = self.get_pos_x0(self.ui, self.bracket_c_t, 0.9)
+        
+        buffer = 2
+        
+        coords['HP'][0] = x0_hp_mp[0] - buffer
+        coords['MP'][0] = x0_hp_mp[1] - buffer
+        coords['HP'][2] = x1_hp_mp[0] + buffer
+        coords['MP'][2] = x1_hp_mp[1] + buffer
+        
+        base_stats = []
+
+        if investigate:
+            for k,v in coords.items():
+                bounding_box = [v[0], v[1], v[2], v[3]]
+                base_stats.append(bounding_box)
+            
+        else:
+            for k,v in coords.items():
+                crop = self.ui[v[1]:v[3], v[0]:v[2]]
+                if k == 'LVL':
+                    stat = self.get_numbers(crop, self.lvl_numbers_t)
+                    base_exp = int(get_expbase(stat))
+                else:
+                    stat = self.get_numbers(crop, self.numbers_t)
+                base_stats.append(stat)
+            base_stats.append(base_exp)
+        return base_stats
+
+
     def display(self, im_name, im):
         cv2.imshow(f"{im_name}", im)
         cv2.waitKey()
@@ -269,7 +315,8 @@ class wrapper():
             'mobs' : [clr_content, self.get_mobs],
             'stats' : [clr_ui, self.get_stats],
             'nametag_t' : [self.name_t, None],
-            'mobs_t' : [self.mobs_t, None]
+            'mobs_t' : [self.mobs_t, None],
+            'base_stats' : [clr_ui, self.get_basestats]
         }
 
         image = items[view][0]
@@ -277,7 +324,7 @@ class wrapper():
         width = 2
   
         if items[view][1] != None:
-            boxes = items[view][1]() if (view != 'stats') else items[view][1](True)
+            boxes = items[view][1]() if ('stats' not in view) else items[view][1](True)
             if view == 'player':
                 image = cv2.rectangle(image, (boxes[0],boxes[1]), (boxes[2],boxes[3]), clr, width) 
             elif view == 'mobs':
@@ -296,4 +343,5 @@ class wrapper():
         else:
             self.display(view, image)
             if save_to_disk: cv2.imwrite(f"{view}.png", image)
+
 
