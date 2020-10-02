@@ -4,7 +4,6 @@ from os.path import join
 
 def get_expbase(lvl):
     exp_table_pth = join(pathlib.Path(__file__).resolve().parents[0],"exp.txt")
-
     with open(exp_table_pth, "r") as f:
         l = f.readlines() 
         
@@ -12,7 +11,6 @@ def get_expbase(lvl):
         exp_table = dict(exp_list)
         
         base_exp = exp_table[str(lvl)]
-
         return base_exp
 
 if __name__ == "__main__":
