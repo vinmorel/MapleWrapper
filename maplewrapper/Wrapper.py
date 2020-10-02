@@ -214,7 +214,7 @@ class wrapper():
         computer can't handle it). 
 
         """
-        self.d.capture(target_fps=fps, region=self.p_coords)     
+        self.d.capture(target_fps=fps, region=self.p_coords) 
         time.sleep(0.2)
 
     def get_aoi(self, game_window, clr_mode):
