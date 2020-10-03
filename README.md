@@ -6,7 +6,7 @@ _A MapleStory GMS v.92 and below client wrapper for real-time game data extracti
 
 * Is incredibly user-friendly. Get started with 2 lines of code. 
 * Extracts player position, player stats, and mob position out of the box 
-* Is easy to debug. Use the inspect() method to figure out what's going on behind the scene.
+* Is easy to debug. Use the inspect() method to figure out what's going on behind the scenes.
 * Is thredded FAST!
 
 ### QuickStart Guide
