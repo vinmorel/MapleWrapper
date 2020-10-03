@@ -1,6 +1,6 @@
 # MapleWrapper
 
-_A MapleStory GMS v.92 and below client wrapper for real-time game data extraction. Enables you to implement your own reinforcement learning environments._
+_A MapleStory GMS v.92 and below client wrapper for real-time game data extraction. Enables you to implement your own reinforcement learning environments and bots._
 
 **MapleWrapper:**
 
