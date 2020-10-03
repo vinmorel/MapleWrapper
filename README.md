@@ -50,6 +50,24 @@ player, stats, mobs = w.observe()
 w.stop()
 ```
 
+**Get player Base Stats**
+
+
+```python
+from maplewrapper import wrapper
+
+w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
+b_stats = w.get_basestats()
+
+print(b_stats)
+```
+```
+Out[1]:  
+[42, 30000, 30000, 285532]
+```
+The _get_basestats_ method returns a numpy array objects representing [LVL, HP, MP, EXP] of your player's current base stats. In other words, you get your players current level, total current possible HP/MP and the total amount of EXP for the LVL. 
+
+
 **Debug Wrapper**
 
 ```python
@@ -69,10 +87,12 @@ The required argument ```item``` can take the following values:
 * ```'player'``` : The content frame and player detection overlay 
 * ```'mobs'``` : The cropped content frame and mobs detection overlay
 * ```'stats'``` : The ui frame and stats detection overlay
+* ```'base_stats'``` : The ui frame and base stats detection overlay
 * ```'nametag_t'``` : The generated nametag template
 * ```'mobs_t'``` : The generated mob templates
 
 You can save to disk by passing optional argument ```save_to_disk=True```
+
 
 ## Requirements
 * Windows 7 and up
