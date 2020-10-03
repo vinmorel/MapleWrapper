@@ -78,7 +78,7 @@ w.inspect('mobs')
 ```
 ![](/assets/mobs.png) 
 
-The _inspect_ method displays the image crop of what the wrapper sees during data extraction. It will also display an overlay of the bounding box of preditions when applicable.
+The _inspect_ method displays the image crop of what the wrapper sees during data extraction. It will also display an overlay of the bounding box of predictions when applicable.
 
 The required argument ```item``` can take the following values:
 * ```'frame'``` : The complete game frame
