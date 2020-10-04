@@ -52,12 +52,16 @@ with wrapper('Your_Player_IGN', mobs=['Mob_Name']) as w:
 from maplewrapper import wrapper
 
 with wrapper('Your_Player_IGN', mobs=['Mob_Name']) as w:
+    # Player hitbox coordinates [x0,y1,x1,y1]
     player = w.get_player()
+    # Player current stats [LVL,HP,MP,EXP]  
     stats = w.get_stats()
+    # Player current base stats [LVL,Total_HP,Toal_MP,Total_EXP_required_for_LVL]  
     base_stats = w.get_basestats()
+    # Mobs hitbox coordinates [x0,y0,x1,y1]
     mobs = w.get_mobs()
 
-    print(player, stats, base_stats, mobs)
+print(player, stats, base_stats, mobs)
 ```
 ```
 Out[1]:  
