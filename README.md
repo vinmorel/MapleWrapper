@@ -24,11 +24,8 @@ You instantiate the wrapper by passing your player in-game name and a list of va
 ```python
 from maplewrapper import wrapper
 
-w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
-
-w.start()
-w.observe(verbose=1)
-w.stop()
+with wrapper('Your_Player_IGN', mobs=['Mob_Name']) as w:
+    w.observe(verbose=1)
 ```
 ```
 Out[1]: 
@@ -37,33 +34,34 @@ Stats:  [11, 261, 118, 7]
 Mobs:   [[354  67 417  97]
          [ 89  67 152  97]]
 ```
-The _observe_ method returns three numpy array objects representing [x0, y0, x1, y1] coordinates for player and mobs and [LVL, HP, MP, EXP] for stats. The _start_ and _stop_ methods respectively start and stop the game capture. 
+The _observe_ method returns three numpy array objects representing [x0, y0, x1, y1] hitbox coordinates for player and mobs and [LVL, HP, MP, EXP] for stats. The _start_ and _stop_ methods respectively start and stop the game capture. 
 
-Alternatively,
+**Alternatively, High speed extraction**
 ```python
 from maplewrapper import wrapper
 
-w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
-
-w.start()
-player, stats, mobs = w.observe()
-w.stop()
+with wrapper('Your_Player_IGN', mobs=['Mob_Name']) as w:
+    while True:
+        player, stats, mobs = w.observe()
 ```
 
-**Get player Base Stats**
+**Extract information by category**
 
 
 ```python
 from maplewrapper import wrapper
 
-w = wrapper('Your_Player_IGN', mobs=['Mob_Name'])
-b_stats = w.get_basestats()
+with wrapper('Your_Player_IGN', mobs=['Mob_Name']) as w:
+    player = w.get_player()
+    stats = w.get_stats()
+    base_stats = w.get_basestats()
+    mobs = w.get_mobs()
 
-print(b_stats)
+    print(player, stats, base_stats, mobs)
 ```
 ```
 Out[1]:  
-[42, 30000, 30000, 285532]
+[394 186 442 202] [11, 261, 118, 7] [42, 30000, 30000, 285532] []
 ```
 The _get_basestats_ method returns a numpy array objects representing [LVL, HP, MP, EXP] of your player's current base stats. In other words, you get your players current level, total current possible HP/MP and the total amount of EXP for the LVL. 
 
