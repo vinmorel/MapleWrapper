@@ -42,7 +42,6 @@ class wrapper():
 
     def __enter__(self):
         self.start()
-        self.update_region(25)
         self.frame, self.content, self.ui = self.get_aoi(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
         return self
 
