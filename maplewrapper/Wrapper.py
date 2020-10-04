@@ -40,6 +40,15 @@ class wrapper():
         self.bracket_c_t = cv2.imread(join(self.assets_pth,"general","bracket_closing.png"),0)
         self.mobs_t = self.initialize_mobs_t(mobs)
 
+    def __enter__(self):
+        self.start()
+        self.update_region(25)
+        self.frame, self.content, self.ui = self.get_aoi(self.d.get_latest_frame(), cv2.COLOR_BGR2GRAY)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.stop()
+
     def single_template_matching(self, img, template, method=cv2.TM_CCOEFF):
         """
         returns int32 numpy array of best template match 
