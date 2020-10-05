@@ -78,8 +78,8 @@ The _get_basestats_ method returns a numpy array objects representing [LVL, HP, 
 ```python
 from maplewrapper import wrapper
 
-w = wrapper('smashy', mobs=['Red Snail'])
-w.inspect('mobs')
+with wrapper('smashy', mobs=['Red Snail']) as w:
+    w.inspect('mobs')
 ```
 ![](/assets/mobs.png) 
 
