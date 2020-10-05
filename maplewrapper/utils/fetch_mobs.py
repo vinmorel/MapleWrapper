@@ -65,7 +65,7 @@ def download_sprites(mob_name):
                 for f in chosen_templates:
                     zip.extract(f, join(pth,"templates","mobs",f"{mob_name}"))
 
-                print(f"'{mob_name}' sprites successfully added to cache")
+                print(f"{mob_name} sprites successfully added to local cache")
 
             os.remove(save_dir)
 
