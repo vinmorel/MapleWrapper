@@ -33,6 +33,7 @@ class wrapper():
         self.ui_frame = [int(self.p_h - 41.01), None, None, int(0.7047 * self.gold[0])]
         self.d = d3dshot.create(capture_output="numpy", frame_buffer_size=50)
         self.name_t = make_tag(player_name)
+        self.name_t_widthm = self.name_t.shape[1]//2
         self.lvl_numbers_t = [cv2.imread(join(self.assets_pth, "numbers_lvl", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers_lvl"))) if isfile(join(self.assets_pth,"numbers_lvl/", f))]
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers"))) if isfile(join(self.assets_pth,"numbers", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,"general","slash.png"),0)
@@ -111,8 +112,16 @@ class wrapper():
         return mob_t
 
     def get_player(self):
-        player = self.single_template_matching(self.content, self.name_t)
+        nametag_box = self.single_template_matching(self.content, self.name_t)
+        player = self.postprocess_player(nametag_box)
         return player
+
+    def postprocess_player(self, nametag_box):
+        nametag_box[0] += (self.name_t_widthm - 25)
+        nametag_box[2] += (-self.name_t_widthm + 25)
+        nametag_box[1] -= 70
+        nametag_box[3] -= 17
+        return nametag_box
 
     def get_mobs(self):
         """
