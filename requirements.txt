@@ -1,5 +1,5 @@
-d3dshot==0.1.5
-numpy==1.19.1
-opencv-python==4.4.0.42
-pywin32==227
-pywin32-ctypes==0.2.0
+d3dshot>=0.1.5
+numpy>=1.19.1
+opencv-python>=4.4.0.42
+pywin32>=227
+pywin32-ctypes>=0.2.0

@@ -25,7 +25,8 @@ setup(
         'numpy>=1.19.1',
         'opencv-python>=4.4.0.42',
         'pywin32>=227',
-        'pywin32-ctypes>=0.2.0'
+        'pywin32-ctypes>=0.2.0',
+        'requests>=2.23.0'
     ],
     package_data={'maplewrapper': ['templates/general/*png', 
                                     'templates/nametag_characters/*png',
