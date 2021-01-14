@@ -95,7 +95,7 @@ class wrapper():
                     mob_im = cv2.cvtColor(clr_mob_im, cv2.COLOR_BGR2GRAY)
                     h,w = mob_im.shape
                     if h >= 43:
-                        mob_im = mob_im[:30,:]
+                        mob_im = mob_im[:-33,:]
 
                     mobs_t.append(mob_im)
                     mobs_t.append(cv2.flip(mob_im, 1))
