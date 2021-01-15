@@ -43,10 +43,10 @@ def download_sprites(mob_name):
                 files_in_zip = zip.namelist()
                 stances = {
                     "hit" : 1,
-                    "stand" : 3,
-                    "move" : 3,
+                    "stand" : 5,
+                    "move" : 5,
                     "attack" : None,
-                    "jump" : 1,
+                    "jump" : 2,
                     "fly" : 3
                 }
 
