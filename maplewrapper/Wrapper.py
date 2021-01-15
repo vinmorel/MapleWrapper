@@ -95,7 +95,7 @@ class wrapper():
                     clr_mob_im = self.blend_mobs(clr_mob_im, content)
                     mob_im = cv2.cvtColor(clr_mob_im, cv2.COLOR_BGR2GRAY)
                     h,w = mob_im.shape
-                    if h >= 41:
+                    if h >= 40:
                         mob_im = mob_im[:-33,:]
 
                     mobs_t.append(mob_im)
