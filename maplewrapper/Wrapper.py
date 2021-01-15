@@ -85,6 +85,7 @@ class wrapper():
     
     def initialize_mobs_t(self, mobs):
         mobs_t = []
+        self.adjust = {}
         content = self.d.screenshot(region=self.p_coords)[self.content_frame[0]:self.content_frame[1], self.content_frame[2]:self.content_frame[3]]
         for mob in mobs:
             download_sprites(mob)
@@ -96,7 +97,6 @@ class wrapper():
                     h,w = mob_im.shape
                     if h >= 41:
                         mob_im = mob_im[:-33,:]
-                        self.adjust = h - mob_im.shape[::-1][1]
 
                     mobs_t.append(mob_im)
                     mobs_t.append(cv2.flip(mob_im, 1))
@@ -346,7 +346,7 @@ class wrapper():
                 image = cv2.rectangle(image, (boxes[0],boxes[1]), (boxes[2],boxes[3]), clr, width) 
             elif view == 'mobs':
                 for box in boxes:
-                    image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3] + self.adjust), clr , width)               
+                    image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3]), clr , width)               
             else:
                 for box in boxes:
                     image = cv2.rectangle(image, (box[0],box[1]), (box[2],box[3]), clr , width)
