@@ -132,7 +132,7 @@ class wrapper():
         ents = np.array([], dtype=np.int32)
 
         with concurrent.futures.ThreadPoolExecutor() as executor: 
-            granular_entities = [executor.submit(self.multi_template_matching, self.content, template, threshold=0.8, method=cv2.TM_CCOEFF_NORMED, nms=False) for i, template in enumerate(self.mobs_t)]
+            granular_entities = [executor.submit(self.multi_template_matching, self.content, template, threshold=0.65, method=cv2.TM_CCOEFF_NORMED, nms=False) for i, template in enumerate(self.mobs_t)]
             for ent in granular_entities:
                 ents = np.append(ents, ent.result())
             
