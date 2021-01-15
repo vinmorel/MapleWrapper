@@ -94,12 +94,13 @@ class wrapper():
                     clr_mob_im = self.blend_mobs(clr_mob_im, content)
                     mob_im = cv2.cvtColor(clr_mob_im, cv2.COLOR_BGR2GRAY)
                     h,w = mob_im.shape
-                    if h >= 43:
+                    if h >= 41:
                         mob_im = mob_im[:-33,:]
+                        self.adjust = h - mob_im.shape[::-1][1]
 
                     mobs_t.append(mob_im)
                     mobs_t.append(cv2.flip(mob_im, 1))
-            self.adjust = h - 30
+
         return mobs_t
 
     def blend_mobs(self, mob_t, content, k=1):
