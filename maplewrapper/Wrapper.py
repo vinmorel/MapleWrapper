@@ -100,7 +100,6 @@ class wrapper():
 
                     mobs_t.append(mob_im)
                     mobs_t.append(cv2.flip(mob_im, 1))
-
         return mobs_t
 
     def blend_mobs(self, mob_t, content, k=1):
