@@ -1,10 +1,11 @@
 import gym
 import time
-from gym import spaces
-from maplewrapper import wrapper
 import numpy as np
 import pydirectinput
+from gym import spaces
+from maplewrapper import wrapper
 import cv2
+
 
 class MapleEnv(gym.Env):
     """
@@ -13,23 +14,23 @@ class MapleEnv(gym.Env):
         See https://github.com/vinmorel/MapleWrapper
     Observation:
         Type: Dict "MapleWrapper" : box(8)
-        Num     Observation               Min                     Max
-        1       Player X1                 0                       825
-        2       Mob X1 (1)                0                       825
-        3       Mob X1 (2)                0                       825
-        4       Mob X1 (3)                0                       825
-        5       Mob X1 (4)                0                       825
-        6       Mob X1 (5)                0                       825
-        7       Player Facing Direction   0                       1
-        8       Attacked                  0                       1
+        Num     Observation                 Min                     Max
+        1       Player X1                   0                       825
+        2       Mob X1 (1)                  0                       825
+        3       Mob X1 (2)                  0                       825
+        4       Mob X1 (3)                  0                       825
+        5       Mob X1 (4)                  0                       825
+        6       Mob X1 (5)                  0                       825
+        7       Player Facing Direction     0                       1
+        8       Attacked                    0                       1
 
     Actions:
         Type: Discrete(4)
-        Num   Action
-        0     Walk left
-        1     Walk right
-        2     Attack 1
-        3     Attack 2
+        Num     Action
+        0       Walk left
+        1       Walk right
+        2       Attack 1
+        3       Attack 2
     Reward:
         Reward is the sum of gained exp minus health damage, mp consumption and time penalities
     Starting State:
@@ -112,7 +113,7 @@ class MapleEnv(gym.Env):
             self.attacked = np.array([0])
         self.stats = new_stats
 
-        # Determine facing dirzzzection 
+        # Determine facing direction 
         if action == 0:
             self.facing = np.array([action])
         if action == 1:
@@ -196,7 +197,7 @@ class MapleEnv(gym.Env):
             self.reward += self.d_hp/self.max_hp
         if self.d_mp < 0 : 
             self.reward += self.d_mp/(self.max_mp * 14)
-        # reward exp gains 
+        # reward exp gains
         if self.d_exp > 0 :
             self.reward += (self.d_exp/self.max_exp) * 200
         # re-extract base stats if level up
