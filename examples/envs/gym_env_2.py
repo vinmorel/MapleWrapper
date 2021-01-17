@@ -56,6 +56,12 @@ class MapleEnv(gym.Env):
 
         self.state = None
         self.done = None
+        self.reward_threshold = 20.0
+        self.trials = 200
+        self.steps_counter = 0
+        self.id = "MapleBot"
+        self.facing = None
+        self.random_t_keydown = 0.01
 
         self.actions_d = {
             '0' : 'left',
@@ -67,12 +73,6 @@ class MapleEnv(gym.Env):
             'pickup' : 'z'
         }
 
-        self.reward_threshold = 20.0
-        self.trials = 200
-        self.steps_counter = 0
-        self.id = "MapleBot"
-        self.facing = None
-        self.random_t_keydown = 0.01
 
     def step(self,action):
         """
@@ -192,7 +192,7 @@ class MapleEnv(gym.Env):
         
         # Default penality 
         self.reward = (-1*self.random_t_keydown)/45
-        # punish hp and mp loss (hp 8x more important than mp)
+        # punish hp and mp loss 
         if self.d_hp < 0 :
             self.reward += self.d_hp/self.max_hp
         if self.d_mp < 0 : 
@@ -208,11 +208,11 @@ class MapleEnv(gym.Env):
     def render(self, mode='human',close=False):
         self.w.inspect('frame')
 
+
 if __name__ == "__main__":   
     with wrapper("Smashy", mobs=["Cynical Orange Mushroom"]) as w:
         env = MapleEnv(w)
         env.reset()
-
         while True:
             env.step(action=None)
             print(env.reward)
