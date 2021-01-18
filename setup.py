@@ -24,7 +24,7 @@ setup(
         'd3dshot',
         'numpy>=1.19.1',
         'opencv-python>=4.4.0.42',
-        'pywin32>=225',
+        'pywin32==225',
         'pywin32-ctypes>=0.2.0',
         'requests>=2.23.0'
     ],
