@@ -71,7 +71,7 @@ class wrapper():
 
         """
         res = cv2.matchTemplate(img,template,method)
-        loc = np.where( res >= threshold)
+        loc = np.where(res >= threshold)
         
         w, h = template.shape[::-1]
         
