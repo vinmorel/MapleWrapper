@@ -32,6 +32,7 @@ setup(
                                     'templates/nametag_characters/*png',
                                     'templates/numbers/*png',
                                     'templates/numbers_lvl/*png',
+                                    'templates/numbers_hitreg/*png',
                                     'utils/*txt']},
     
     classifiers=[

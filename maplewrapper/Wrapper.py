@@ -35,6 +35,7 @@ class wrapper():
         self.name_t = make_tag(player_name)
         self.name_t_widthm = self.name_t.shape[1]//2
         self.lvl_numbers_t = [cv2.imread(join(self.assets_pth, "numbers_lvl", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers_lvl"))) if isfile(join(self.assets_pth,"numbers_lvl/", f))]
+        self.hitreg_numbers_t = [cv2.imread(join(self.assets_pth, "numbers_hitreg", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers_hitreg"))) if isfile(join(self.assets_pth,"numbers_hitreg/", f))]
         self.numbers_t = [cv2.imread(join(self.assets_pth, "numbers", f),0) for f in sorted(listdir(join(self.assets_pth,"numbers"))) if isfile(join(self.assets_pth,"numbers", f))]
         self.slash_t = cv2.imread(join(self.assets_pth,"general","slash.png"),0)
         self.bracket_t = cv2.imread(join(self.assets_pth,"general","bracket.png"),0)
@@ -308,6 +309,24 @@ class wrapper():
             base_stats.append(base_exp)
         return base_stats
 
+    def get_hitreg(self):
+        """
+        Returns Bool of mobs taking dmg
+        Searches for hitreg numbers, returns 1 if hit
+        Leverages multi-processing.
+        """
+        ents = np.array([], dtype=np.int32)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor: 
+            granular_entities = [executor.submit(self.multi_template_matching, self.content, template, threshold=0.85, method=cv2.TM_CCOEFF_NORMED, nms=False) for i, template in enumerate(self.hitreg_numbers_t)]
+            for ent in granular_entities:
+                ents = np.append(ents, ent.result())
+            
+            size = ents.shape[0]
+            if size == 0:
+                return False
+
+            return True
 
     def display(self, im_name, im):
         cv2.imshow(f"{im_name}", im)
