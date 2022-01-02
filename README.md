@@ -101,7 +101,7 @@ You can save to disk by passing optional argument ```save_to_disk=True```
 
 ## Requirements
 * Windows 7 and up
-* Python 3.6+ 
+* Python 3.6, 3.7 or 3.8
 
 
 ## Installation
