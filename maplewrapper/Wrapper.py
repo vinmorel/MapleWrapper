@@ -210,7 +210,10 @@ class wrapper():
         Returns list [x1, ...] of the position(s) x0(s) of templates in UI.
         """
         x1 = self.multi_template_matching(ui, template, threshold=thresh, method=cv2.TM_CCOEFF_NORMED, nms=True)
-        x1 = np.sort(x1[:,coord])
+        try:
+            x1 = np.sort(x1[:,coord])
+        except TypeError:
+            raise Obstructed_Game_Window(f"Could not locate player stats. Please verify the game window is visible on screen.")
         return x1
     
     def different_ratio(self):
@@ -380,4 +383,5 @@ class wrapper():
             self.display(view, image)
             if save_to_disk: cv2.imwrite(f"{view}.png", image)
 
-
+class Obstructed_Game_Window(Exception):
+    pass

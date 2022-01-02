@@ -30,9 +30,13 @@ def download_sprites(mob_name):
 
             try:
                 mob_id = identifiers[mob_name]
-                os.makedirs(output_dir)
             except KeyError:
                 raise Invalid_Mob_Name(f"Please verify '{mob_name}' spelling and confirm it is a valid entry at: https://github.com/vinmorel/MapleWrapper/blob/master/maplewrapper/utils/mobs.txt")
+            
+            try:
+                os.makedirs(output_dir)
+            except Exception as e:
+                print(e)
 
             api = f"https://maplestory.io/api/GMS/83/mob/{mob_id}/download"
 
